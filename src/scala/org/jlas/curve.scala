@@ -107,34 +107,32 @@ final class ImmutableCurve(descriptor:Descriptor, index:Curve, data:List[Double]
 final class MutableCurve(private var descriptor:Descriptor,
 			 private var index:Curve,
 			 private var data:List[Double])
-extends IsMutableCurve {
+extends IsMutableCurve with MutexLocked {
   import Curve._
-  private val lock = new ReentrantReadWriteLock(true)
-
-  override def getDescriptor = descriptor
+  override def getDescriptor = guardLock { descriptor }
   override def setDescriptor(d:Descriptor) {
-    this.descriptor = d
+    guardLock { this.descriptor = d }
   }
 
-  override def getLasData = data 
+  override def getLasData = guardLock { data }
   override def setLasData(d:List[Double]){
-    this.data = d
+    guardLock { this.data = d }
   }
 
-  override def getIndex = index
+  override def getIndex = guardLock { index }
   override def setIndex(c:Curve) {
-    this.index = c
+    guardLock { this.index = c }
   }
-  override def getMnemonic = descriptor.getMnemonic
-  override def getUnit = descriptor.getUnit
-  override def getData = descriptor.getData
-  override def getDescription = descriptor.getDescription
+  override def getMnemonic = guardLock { descriptor.getMnemonic }
+  override def getUnit = guardLock { descriptor.getUnit }
+  override def getData = guardLock { descriptor.getData }
+  override def getDescription = guardLock { descriptor.getDescription }
 
-  override def toString = getMnemonic + " " + getLasData.size
+  override def toString = guardLock { getMnemonic + " " + getLasData.size }
 
-  override def sampleRate = Curve.sampleRate(this)
+  override def sampleRate = guardLock { Curve.sampleRate(this) }
 
-  override def adjustedCurve(pindex:Curve):Curve = adjustCurve(pindex, this)
+  override def adjustedCurve(pindex:Curve):Curve = guardLock { adjustCurve(pindex, this) }
 }
   
 

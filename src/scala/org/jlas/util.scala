@@ -2,7 +2,7 @@ package org.jlas
 
 import scala.collection.jcl.Conversions._
 import scala.util.Sorting
-import java.util.concurrent.locks.{ReadWriteLock, ReentrantReadWriteLock}
+import java.util.concurrent.locks.{ReadWriteLock, ReentrantReadWriteLock, ReentrantLock, Lock}
 
 object Util {
   implicit def fun2Run[T](x: => T) : Runnable = new Runnable() { def run = x }
@@ -32,5 +32,42 @@ object Util {
       lock.readLock.unlock()
     }
   }
+
+  def withLock[A](lock:Lock)(fn: => A):A = {
+    lock.lock()
+    try {
+      fn 
+    } finally {
+      lock.unlock()
+    }
+  }
     
 }
+
+
+trait MutexLocked {
+  import Util.withLock
+  val lock = new ReentrantLock(true)
+  var thread:Thread = null
+  
+  def lockObj {
+    withLock(lock){
+      thread = Thread.currentThread
+    }
+  }
+
+  def guardLock[A](fn: => A):A = {
+    withLock(lock){
+      if(thread eq Thread.currentThread){
+	fn
+      }
+      else {
+	throw new RuntimeException("thread does not hold lock")
+      }
+    }
+  }
+}
+
+  
+      
+

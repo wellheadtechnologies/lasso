@@ -1,10 +1,16 @@
-<project xmlns:ivy="antlib:org.apache.ivy.ant" name="jlas" default="build">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="lasa" default="build">
+  <property name="revision" value="0.1" />
+  <property name="ivy.settings.dir" value="../settings" />
+  <property file="${ivy.settings.dir}/ivysettings.properties" />
   <property name="src.dir" value="src" />
   <property name="java.src.dir" value="${src.dir}/java" />
   <property name="scala.src.dir" value="${src.dir}/scala" />
   <property name="build.dir" value="build" />
-  <property name="jar.file" value="jlas.jar" />
+  <property name="jar.file" value="${build.dir}/lasa.jar" />
   <property name="lib.dir" value="lib" />
+  <property name="classes.dir" value="${build.dir}/classes" />
+
+  <ivy:settings file="${ivy.settings.dir}/ivysettings.xml" />
   
 
   <taskdef resource="scala/tools/ant/antlib.xml">
@@ -20,16 +26,16 @@
   
   <target name="init" depends="resolve">
     <mkdir dir="${build.dir}"/>
+    <mkdir dir="${classes.dir}" />
   </target>
 
   <target name="clean">
     <delete dir="${build.dir}"/>
-    <delete file="${jar.file}" />
   </target>
 
   <target name="build" depends="clean, init">
     <echo>building scala</echo>
-    <scalac srcdir="${scala.src.dir}" destdir="${build.dir}">
+    <scalac srcdir="${scala.src.dir}" destdir="${classes.dir}">
       <classpath>
 	<fileset dir="${lib.dir}">
 	  <include name="**/*.jar" />
@@ -42,10 +48,12 @@
   </target>
 
   <target name="jar" depends="build">
-    <jar destfile="${jar.file}">
-      <fileset dir="${build.dir}">
-	<include name="**/*.class" />
-      </fileset>
+    <propertyfile file="${classes.dir}/version.properties">
+      <entry  key="version" type="int" operation="+" default="0" />
+    </propertyfile>
+    <property file="${classes.dir}/version.properties" />
+    <jar destfile="${build.dir}/${ant.project.name}.jar">
+      <fileset dir="${classes.dir}" />
     </jar>
   </target>
 
@@ -64,5 +72,18 @@
       <arg value="-o" />
     </java>
   </target>
+
+  <target name="publish" depends="jar" description="--> publish this project in the ivy repository">
+    <property name="revision" value="${version}"/>
+    <delete file="${build.dir}/ivy.xml"/>
+    <ivy:publish artifactspattern="${build.dir}/[artifact].[ext]" 
+		 resolver="projects"
+		 pubrevision="${revision}" 
+		 status="release"
+		 overwrite="true"
+		 />
+    <echo message="project ${ant.project.name} released with version ${revision}" />
+  </target>
+  
   
 </project>

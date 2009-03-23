@@ -53,22 +53,21 @@ class ParserTest extends FunSuite {
   test ("Parser should parse all") { 
     val directory = new File("las_files")
     val files = directory.listFiles
-    for(file <- files){
+    for(file <- files){ 
       DefaultLasParser.parseLasFile(file)
     }
   }
   
   test ("Writer should write lasfile") {
-    def in_out(path:String) { 
-      val lf1 = DefaultLasParser.parseLasFile(path)
+    def in_out(file:File) { 
+      val lf1 = DefaultLasParser.parseLasFile(file)
       DefaultLasWriter.writeLasFile(lf1, "output_test.las") 
       val lf2 = DefaultLasParser.parseLasFile("output_test.las")
       assert(lf1 === lf2)
     }
-    
-    in_out("las_files/test.las")
-    in_out("las_files/dollie.las")
-    in_out("las_files/robert.las")
-    in_out("las_files/x4.las")
+    val directory = new File("las_files")
+    for(file <- directory.listFiles){
+      in_out(file)
+    }
   }
 }

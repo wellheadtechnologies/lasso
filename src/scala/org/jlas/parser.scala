@@ -55,9 +55,9 @@ object DefaultLasParser extends LasParser {
 	cdatas(i) += d
       })
     }	
-    val index = new DefaultCurve(descriptors(0), null, cdatas(0).toList)
+    val index = new ImmutableCurve(descriptors(0), null, cdatas(0).toList)
     val final_curves = (1 until n).map(i => {
-      new DefaultCurve(descriptors(i), index, cdatas(i).toList)
+      new ImmutableCurve(descriptors(i), index, cdatas(i).toList)
     }).toList
     (index, final_curves)
   }

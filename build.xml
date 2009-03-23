@@ -1,0 +1,68 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="jlas" default="build">
+  <property name="src.dir" value="src" />
+  <property name="java.src.dir" value="${src.dir}/java" />
+  <property name="scala.src.dir" value="${src.dir}/scala" />
+  <property name="build.dir" value="build" />
+  <property name="jar.file" value="jlas.jar" />
+  <property name="lib.dir" value="lib" />
+  
+
+  <taskdef resource="scala/tools/ant/antlib.xml">
+    <classpath>
+      <pathelement location="${lib.dir}/scala-compiler-2.7.3.jar" />
+      <pathelement location="${lib.dir}/scala-library-2.7.3.jar" />
+    </classpath>
+  </taskdef>
+
+  <target name="resolve">
+    <ivy:retrieve/>
+  </target>
+  
+  <target name="init" depends="resolve">
+    <mkdir dir="${build.dir}"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+    <delete file="${jar.file}" />
+  </target>
+
+  <target name="build" depends="clean, init">
+    <echo>building scala</echo>
+    <scalac srcdir="${scala.src.dir}" destdir="${build.dir}">
+      <classpath>
+	<fileset dir="${lib.dir}">
+	  <include name="**/*.jar" />
+	</fileset>
+	<fileset dir="${build.dir}">
+	  <include name="**/*.class" />
+	</fileset>
+      </classpath>
+    </scalac>
+  </target>
+
+  <target name="jar" depends="build">
+    <jar destfile="${jar.file}">
+      <fileset dir="${build.dir}">
+	<include name="**/*.class" />
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="test" depends="jar">
+    <echo>testing parser</echo>
+    <java classname="org.scalatest.tools.Runner" fork="true">
+      <classpath>
+	<path location="${jar.file}" />
+	<fileset dir="${lib.dir}">
+	  <include name="**/*.jar" />
+	</fileset>
+      </classpath>
+
+      <arg value="-p" />
+      <arg value="${jar.file}"/>
+      <arg value="-o" />
+    </java>
+  </target>
+  
+</project>

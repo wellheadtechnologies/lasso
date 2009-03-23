@@ -1,0 +1,12 @@
+<ivy-module version="2.0">
+  <info organisation="wellhead" module="jlas"/>
+  <dependencies>
+    <dependency org="commons-collections" name="commons-collections" rev="3.2.1" /> 
+    <dependency org="org.scala-lang" name="scala-compiler" rev="2.7.3" />
+    <dependency org="org.scala-lang" name="scala-library" rev="2.7.3" />
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.5.6" />
+    <dependency org="ch.qos.logback" name="logback-core" rev="0.9.15" />
+    <dependency org="ch.qos.logback" name="logback-classic" rev="0.9.15" />
+    <dependency org="org.scala-tools.testing" name="scalatest" rev="0.9.5" />
+  </dependencies>
+</ivy-module>

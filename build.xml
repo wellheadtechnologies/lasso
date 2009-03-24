@@ -1,5 +1,5 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant" name="lasa" default="build">
-  <property name="revision" value="0.1" />
+  <property name="revision" value="0.11" />
   <property name="ivy.settings.dir" value="../settings" />
   <property file="${ivy.settings.dir}/ivysettings.properties" />
   <property name="src.dir" value="src" />

@@ -32,7 +32,7 @@ object Util {
       lock.readLock.unlock()
     }
   }
-
+  
   def withLock[A](lock:Lock)(fn: => A):A = {
     lock.lock()
     try {
@@ -41,7 +41,16 @@ object Util {
       lock.unlock()
     }
   }
+
+  def time[A](msg:String)(fn: => A):A = {
+    val start = System.currentTimeMillis
+    val ret = fn
+    val end = System.currentTimeMillis
+    println(msg + (end - start))
+    ret 
+  }
     
+  
 }
 
 
@@ -50,9 +59,12 @@ trait MutexLocked {
   val lock = new ReentrantLock(true)
   var thread:Thread = null
   
-  def lockObj {
+  def grabLock[A](fn: => A):A = {
     withLock(lock){
       thread = Thread.currentThread
+      val ret = fn
+      thread = null
+      ret
     }
   }
 

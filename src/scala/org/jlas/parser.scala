@@ -33,7 +33,7 @@ object DefaultLasParser extends LasParser {
       val headers = parseHeaders(reader)
       val curveHeader = headers.find(_.getType == "CurveHeader").get
       val (index, curves) = parseCurves(curveHeader, reader)
-      new DefaultLasFile(file.getName, headers, index, curves)
+      new ImmutableLasFile(file.getName, headers, index, curves)
     } catch {
       case e => 
 	logger.error("parser failed at line number : " + reader.getLineNumber)
@@ -69,7 +69,7 @@ object DefaultLasParser extends LasParser {
     for(i <- 0 until 4){
       val (prefix_line, descriptors) = parseDescriptors(reader)
       val htype = header_prefixes(prefix)
-      headers += new DefaultHeader(htype, prefix, descriptors)
+      headers += new ImmutableHeader(htype, prefix, descriptors)
       prefix = prefix_line.trim.take(2)
     }
     return headers.toList
@@ -116,7 +116,7 @@ object DefaultLasParser extends LasParser {
     val colon = line3.lastIndexOf(':')
     val data = line3.substring(0, colon)
     val description = line3.substring(colon+1)
-    return new DefaultDescriptor(mnemonic.trim, unit.trim, data.trim, description.trim)
+    return new ImmutableDescriptor(mnemonic.trim, unit.trim, data.trim, description.trim)
   }
 
   private def isComment(line:String) = line.startsWith("#") || line.trim.startsWith("#")

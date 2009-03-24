@@ -1,5 +1,6 @@
 package org.jlas
 import org.scalatest._
+import org.jlas.Util.time
 import java.io.File
 
 class ParserTest extends FunSuite {
@@ -60,14 +61,18 @@ class ParserTest extends FunSuite {
   
   test ("Writer should write lasfile") {
     def in_out(file:File) { 
-      val lf1 = DefaultLasParser.parseLasFile(file)
-      DefaultLasWriter.writeLasFile(lf1, "output_test.las") 
-      val lf2 = DefaultLasParser.parseLasFile("output_test.las")
+      val lf1 = time("parsing took: ") { DefaultLasParser.parseLasFile(file) }
+      time("writing took: ") { DefaultLasWriter.writeLasFile(lf1, "output_test.las") }
+      val lf2 = time("parsing again took: ") { DefaultLasParser.parseLasFile("output_test.las") }
       assert(lf1 === lf2)
     }
     val directory = new File("las_files")
+    var i = 0
     for(file <- directory.listFiles){
-      in_out(file)
+      if(i % 2 == 0){
+	in_out(file)
+      }
+      i += 1
     }
   }
 }

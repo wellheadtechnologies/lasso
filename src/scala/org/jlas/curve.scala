@@ -31,18 +31,16 @@ trait Curve {
     logger.debug("testing lasdata")
     if(this.getLasData == null || that.getLasData == null){
       logger.debug("lasdata is null")
+      return false
     }
     val size = this.getLasData.size
     if(size != that.getLasData.size){
       logger.debug("data-sizes: {} != {}", size, that.getLasData.size)
       return false
     }
-    for(i <- 0 until size){
-      val (x,y) = (this.getLasData(i), that.getLasData(i));
-      if(x != y){
-	logger.debug("{} != {}", x, y)
-	return false
-      }
+    if(this.getLasData != that.getLasData){
+      logger.debug("las data not equal!")
+      return false
     }
     logger.debug("curves equal")
     return true
@@ -57,7 +55,6 @@ trait IsMutableCurve extends Curve {
 
 //Assumption of Immutability
 final class ImmutableCurve(descriptor:Descriptor, index:Curve, data:List[Double]) extends Curve {
-  import Curve._
   override def getDescriptor = descriptor
   override def getLasData = data
   override def getIndex = index
@@ -66,42 +63,8 @@ final class ImmutableCurve(descriptor:Descriptor, index:Curve, data:List[Double]
   override def getData = descriptor.getData
   override def getDescription = descriptor.getDescription
   override def toString = getMnemonic + " " + getLasData.size
-
   override def sampleRate = Curve.sampleRate(this)
-
-  override def adjustedCurve(pindex:Curve):Curve = adjustCurve(pindex, this)
-
-  override def equals(_that:Any):Boolean = {
-    logger.debug("testing curve equality for {}", this.getMnemonic)
-    if(!_that.isInstanceOf[Curve]) {
-      logger.debug("{} is not an instance of Curve", _that)
-      return false
-    }
-    val that = _that.asInstanceOf[Curve]
-    logger.debug("testing descriptors")
-    if(this.getDescriptor != that.getDescriptor){
-      logger.debug("descriptors: {} != {}", this.getDescriptor, that.getDescriptor)
-      return false
-    }
-    logger.debug("testing lasdata")
-    if(getLasData == null || that.getLasData == null){
-      logger.debug("lasdata is null")
-    }
-    val size = getLasData.size
-    if(size != that.getLasData.size){
-      logger.debug("data-sizes: {} != {}", size, that.getLasData.size)
-      return false
-    }
-    for(i <- 0 until size){
-      val (x,y) = (this.getLasData(i), that.getLasData(i));
-      if(x != y){
-	logger.debug("{} != {}", x, y)
-	return false
-      }
-    }
-    logger.debug("curves equal")
-    return true
-  }
+  override def adjustedCurve(pindex:Curve):Curve = Curve.adjustCurve(pindex, this)
 }
 
 final class MutableCurve(private var descriptor:Descriptor,
@@ -129,6 +92,8 @@ extends IsMutableCurve with MutexLocked {
   override def getDescription = guardLock { descriptor.getDescription }
 
   override def toString = guardLock { getMnemonic + " " + getLasData.size }
+
+  override def equals(that:Any) = guardLock { super.equals(that) }
 
   override def sampleRate = guardLock { Curve.sampleRate(this) }
 

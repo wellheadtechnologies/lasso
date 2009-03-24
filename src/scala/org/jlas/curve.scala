@@ -4,14 +4,14 @@ import org.slf4j.{Logger,LoggerFactory}
 import java.util.concurrent.locks.{ReadWriteLock, ReentrantReadWriteLock}
 
 trait Curve {
-  def getDescriptor:Descriptor
-  def getLasData:List[Double]
-  def getIndex:Curve
-  def getMnemonic:String
-  def getUnit:Any
-  def getData:Any
-  def getDescription:String
-  def sampleRate:Double
+  def getDescriptor():Descriptor
+  def getLasData():List[Double]
+  def getIndex():Curve
+  def getMnemonic():String
+  def getUnit():Any
+  def getData():Any
+  def getDescription():String
+  def sampleRate():Double
   def adjustedCurve(pindex:Curve):Curve
 
   val logger = LoggerFactory.getLogger("org.jlas.Curve")

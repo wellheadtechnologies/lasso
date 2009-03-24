@@ -3,15 +3,15 @@ package org.jlas
 import org.slf4j.{Logger,LoggerFactory}
 
 trait LasFile {
-  def getName:String
-  def getCurves:List[Curve]
-  def getHeaders:List[Header]
-  def getIndex:Curve
+  def getName():String
+  def getCurves():List[Curve]
+  def getHeaders():List[Header]
+  def getIndex():Curve
   def getCurve(name:String):Curve
-  def getVersionHeader:Header
-  def getWellHeader:Header
-  def getCurveHeader:Header
-  def getParameterHeader:Header
+  def getVersionHeader():Header
+  def getWellHeader():Header
+  def getCurveHeader():Header
+  def getParameterHeader():Header
 
   private val logger = LoggerFactory.getLogger("core.LasFile")
   override def equals(_that:Any):Boolean = {

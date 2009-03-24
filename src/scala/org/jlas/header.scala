@@ -3,9 +3,9 @@ package org.jlas
 import org.slf4j.{Logger,LoggerFactory}
 
 trait Header {
-  def getType:String
-  def getPrefix:String
-  def getDescriptors:List[Descriptor]
+  def getType():String
+  def getPrefix():String
+  def getDescriptors():List[Descriptor]
   def getDescriptor(name:String):Descriptor
 
   val logger = LoggerFactory.getLogger("core.Header")

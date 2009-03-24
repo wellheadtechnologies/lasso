@@ -8,5 +8,6 @@
     <dependency org="ch.qos.logback" name="logback-core" rev="0.9.15" />
     <dependency org="ch.qos.logback" name="logback-classic" rev="0.9.15" />
     <dependency org="org.scala-tools.testing" name="scalatest" rev="0.9.5" />
+    <dependency org="net.sf.jopt-simple" name="jopt-simple" rev="3.0.1" />
   </dependencies>
 </ivy-module>

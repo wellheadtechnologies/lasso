@@ -1,10 +1,10 @@
 package org.jlas
 
 trait Descriptor {
-  def getMnemonic:String
-  def getUnit:Any
-  def getData:Any
-  def getDescription:String
+  def getMnemonic():String
+  def getUnit():Any
+  def getData():Any
+  def getDescription():String
   override def equals(_that:Any):Boolean = {
     if(!_that.isInstanceOf[Descriptor]) return false
     val that = _that.asInstanceOf[Descriptor]

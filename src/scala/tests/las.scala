@@ -54,14 +54,14 @@ class CurveTest extends FunSuite {
   }
 
   test("test mutating descriptors") {
-    val desc = new MutableDescriptor("depth", 1,2, "distance under the earth")
+    val desc = new MutableDescriptor("depth", "1","2", "distance under the earth")
     errorOrFail { desc.setMnemonic("foo") }
-    errorOrFail { desc.setUnit(1.2) }
+    errorOrFail { desc.setUnit("1.2") }
     errorOrFail { desc.setData("bar") }
     errorOrFail { desc.setDescription("rubarb") }
     desc.grabLock {
       desc.setMnemonic("foo")
-      desc.setUnit(1.2)
+      desc.setUnit("1.2")
       desc.setData("bar")
       desc.setDescription("rubarb")
     }
@@ -71,7 +71,7 @@ class CurveTest extends FunSuite {
     errorOrFail { desc.getDescription }
     desc.grabLock { 
       assert(desc.getMnemonic === "foo")
-      assert(desc.getUnit === 1.2)
+      assert(desc.getUnit === "1.2")
       assert(desc.getData === "bar")
       assert(desc.getDescription === "rubarb")
     }

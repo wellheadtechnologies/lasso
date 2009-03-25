@@ -9,5 +9,6 @@
     <dependency org="ch.qos.logback" name="logback-classic" rev="0.9.15" />
     <dependency org="org.scala-tools.testing" name="scalatest" rev="0.9.5" />
     <dependency org="net.sf.jopt-simple" name="jopt-simple" rev="3.0.1" />
+    <dependency org="org.xerial" name="sqlite-jdbc" rev="3.6.11" />
   </dependencies>
 </ivy-module>

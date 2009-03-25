@@ -2,8 +2,8 @@ package org.jlas
 
 trait Descriptor {
   def getMnemonic():String
-  def getUnit():Any
-  def getData():Any
+  def getUnit():String
+  def getData():String
   def getDescription():String
   override def equals(_that:Any):Boolean = {
     if(!_that.isInstanceOf[Descriptor]) return false
@@ -18,12 +18,12 @@ trait Descriptor {
 
 trait IsMutableDescriptor extends Descriptor {
   def setMnemonic(s:String)
-  def setUnit(a:Any)
-  def setData(a:Any)
+  def setUnit(a:String)
+  def setData(a:String)
   def setDescription(s:String)
 }
 
-final class ImmutableDescriptor(mnemonic:String, unit:Any, data:Any, description:String)
+final class ImmutableDescriptor(mnemonic:String, unit:String, data:String, description:String)
 extends Descriptor {
   override def getMnemonic = mnemonic
   override def getUnit = unit
@@ -33,8 +33,8 @@ extends Descriptor {
 }
   
 final class MutableDescriptor(private var mnemonic:String,
-			      private var unit:Any,
-			      private var data:Any,
+			      private var unit:String,
+			      private var data:String,
 			      private var description:String)
 extends IsMutableDescriptor with MutexLocked {
   override def getMnemonic = guardLock { mnemonic }
@@ -46,11 +46,11 @@ extends IsMutableDescriptor with MutexLocked {
     guardLock { this.mnemonic = m }
   }
 
-  override def setUnit(u:Any) { 
+  override def setUnit(u:String) { 
     guardLock { this.unit = u }
   }
 
-  override def setData(d:Any) {
+  override def setData(d:String) {
     guardLock { this.data = d }
   }
 

@@ -21,6 +21,7 @@ object DefaultLasWriter extends LasWriter {
   }
 
   override def writeLasFile(lf:LasFile, writer:BufferedWriter) {
+    val write = (s:String) => writer.write(s)
     try {
       writeHeaders(lf, writer)
       writeCurves(lf, writer)
@@ -95,9 +96,16 @@ object ClojureWriter extends LasWriter {
   }
 
   override def writeLasFile(lf:LasFile, writer:BufferedWriter) {
+    val write = (s:String) => writer.write(s)
     try {
+      write("{")
+      write(":headers ")
       writeHeaders(lf, writer)
+      
+      write(", ")
+      write(":curves ")
       writeCurves(lf, writer)
+      write("}")
     } finally {
       writer.close()
     }
@@ -105,23 +113,27 @@ object ClojureWriter extends LasWriter {
 
   private def writeHeaders(lf: LasFile, writer:BufferedWriter) {
     val headers = lf.getHeaders
+    writer.write("[")
     for(h <- headers) {
       writeHeader(h, writer)
+      writer.newLine
     }
+    writer.write("]")
+    writer.newLine
   }
 
   private def writeHeader(h:Header, writer:BufferedWriter) {
     val write = (s:String) => writer.write(s)
     write("{")
     write(":type ")
-    write(h.getType)
+    write(quote(h.getType))
     
     write(", ")
     
     write(":prefix ")
-    write(h.getPrefix)
+    write(quote(h.getPrefix))
     
-    write(", ")
+    writer.newLine
 
     write(":descriptors ")
     writeDescriptors(h.getDescriptors, writer)
@@ -133,7 +145,7 @@ object ClojureWriter extends LasWriter {
     write("[")
     for(d <- descriptors){
       writeDescriptor(d, writer)
-      write(", ")
+      writer.newLine
     }
     write("]")
   }
@@ -142,33 +154,41 @@ object ClojureWriter extends LasWriter {
     val write = (s:String) => writer.write(s)
     write("{")
     write(":mnemonic ")
-    write(descriptor.getMnemonic)
+    write(quote(descriptor.getMnemonic))
     
     write(", ")
 
     write(":unit ")
-    write(descriptor.getUnit.toString)
+    write(quote(descriptor.getUnit.toString))
 
     write(", ")
 
     write(":data ")
-    write(descriptor.getData.toString)
+    write(quote(descriptor.getData.toString))
 
     write(", ")
 
     write(":description ")
-    write(descriptor.getDescription.toString)
+    write(quote(descriptor.getDescription))
     write("}")
   }
 
+  private def writeIndex(lf: LasFile, writer: BufferedWriter) {
+    val write = (s:String) => writer.write(s)
+    write(":index ")
+    write(quote(lf.getIndex.getMnemonic))
+    writer.newLine
+  }
+
+
   private def writeCurves(lf: LasFile, writer: BufferedWriter) {
     val write = (s:String) => writer.write(s)
-    val index = lf.getIndex
-    write(":index ")
-    writeCurve(index, writer)
+    write("[")
     for(curve <- lf.getCurves){
       writeCurve(curve, writer)
+      writer.newLine
     }
+    write("]")
   }			     
 
   private def writeCurve(curve:Curve, writer: BufferedWriter) {
@@ -176,15 +196,19 @@ object ClojureWriter extends LasWriter {
     write("{")
     write(":descriptor ")
     writeDescriptor(curve.getDescriptor, writer)
+    writer.newLine
     
-    write(", ")
+    write(":data ")
 
     write("[")
     for(d <- curve.getLasData){
       write(d.toString)
-      write(", ")
+      write(" ")
     }
     write("]")
+    write("}")
   }
+  
+  private def quote(s:String) = "\"" + s + "\""
 }
 

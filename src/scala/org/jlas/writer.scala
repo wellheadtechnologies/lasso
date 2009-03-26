@@ -4,8 +4,8 @@ import java.io._
 import java.text.DecimalFormat
 
 trait LasWriter {
-  def writeLasFile(lf:LasFile, file:File)
   def writeLasFile(lf:LasFile, path:String)
+  def writeLasFile(lf:LasFile, file:File)
   def writeLasFile(lf:LasFile, writer:BufferedWriter)
 }
 

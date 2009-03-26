@@ -2,65 +2,28 @@ package org.jlas
 import org.slf4j.{Logger,LoggerFactory}
 import scala.collection.mutable.{ListBuffer}
 import java.io.{BufferedWriter,OutputStreamWriter, FileWriter}
+import joptsimple.{OptionParser,OptionSet}
 
 object Main {
-  var cursor = 0
-  var args:Array[String] = null
-
-  def main(_args:Array[String]) {
-    args = _args
-    try {
-      command()
-    } finally {
-      args = null
-      cursor = 0
+  def main(args:Array[String]) {
+    val parser = new OptionParser("p:o:")
+    val options = parser.parse(args:_*)
+    var lasfile:LasFile = null
+    if(options.has("p")){
+      lasfile = DefaultLasParser.parseLasFile(options.valueOf("p").toString)
+      if(options.has("o")){
+	options.valueOf("o") match {
+	  case "database" => {
+	    val lfdb = new LasFileDB
+	    lfdb.saveLasFile(lasfile)
+	  }
+	  case "clojure" => {
+	    ClojureWriter.writeLasFile(lasfile, "parse_out.clj")
+	  }
+	}
+      }
     }
   }
-
-  def command() {
-    argument() match {
-      case "parse" => parseLasFiles()
-    }
-  }
-
-  def parseLasFiles(){
-    val fs = files()
-    val out = outputFormat()
-    val lasfiles= fs.map(f => DefaultLasParser.parseLasFile(f))
-    for(lasfile <- lasfiles){
-      out.writeLasFile(lasfile, new BufferedWriter(new FileWriter("parse_out.clj")))
-    }
-  }
-
-  def files() = {
-    val fs = new ListBuffer[String]
-    while(peek() != "output"){
-      fs += argument()
-    }
-    fs.toList
-  }
-
-  def outputFormat() = {
-    guard(argument() == "output", "expected output")
-    argument() match {
-      case "clojure" => ClojureWriter
-    }
-  }
-
-  def argument():String = {
-    val ret = args(cursor)
-    cursor += 1
-    ret 
-  }
-
-  def peek():String = args(cursor)
-  
-  def guard(cond:Boolean, msg:String){
-    if(!cond){
-      throw new RuntimeException(msg)
-    }
-  }
-    
-
 }
+
 

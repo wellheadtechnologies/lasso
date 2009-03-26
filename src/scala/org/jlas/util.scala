@@ -3,6 +3,7 @@ package org.jlas
 import scala.collection.jcl.Conversions._
 import scala.util.Sorting
 import java.util.concurrent.locks.{ReadWriteLock, ReentrantReadWriteLock, ReentrantLock, Lock}
+import java.sql.{Connection,DriverManager,ResultSet,SQLException,Statement}
 
 object Util {
   implicit def fun2Run[T](x: => T) : Runnable = new Runnable() { def run = x }
@@ -49,7 +50,15 @@ object Util {
     println(msg + (end - start))
     ret 
   }
-    
+
+  def withConnection[A](url:String)(fn: (Connection) => A):A = {
+    val connection = DriverManager.getConnection(url)
+    try {
+      fn(connection)
+    } finally {
+      connection.close()
+    }
+  }
   
 }
 

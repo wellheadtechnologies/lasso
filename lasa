@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+require 'find'
+
+interactive = ARGV.any? {|a| a =~ /-i/}
+build = ARGV.any? {|a| a =~ /-b/}
+test = ARGV.any? {|a| a =~ /-t/}
+test_db = ARGV.any? {|a| a =~ /-d/}
+
+if build
+  system("ant jar") or fail
+end
+
+classpath = "build/lasa.jar"
+Find.find("lib") do |p|
+  if p =~ /.jar$/
+    classpath += ":#{p}"
+  end
+end
+
+if interactive
+  system("scala -cp #{classpath}")
+end
+
+if test 
+  test_script = '''
+import org.jlas.Main
+Main.main(Array[String](\"parse\", \"las_files/test.las\", \"output\", \"clojure\"))
+'''
+  system("echo \"#{test_script}\"")
+  system("echo \"#{test_script}\" | scala -cp #{classpath}")
+elsif test_db 
+  test_script = '''
+import org.jlas.{LasFileDB,DefaultLasParser}
+val lf = DefaultLasParser.parseLasFile(\"las_files/test.las\")
+LasFileDB.createDB
+LasFileDB.saveLasFile(lf)
+'''
+  system("echo \"#{test_script}\" | scala -cp #{classpath}")
+end
+
+  

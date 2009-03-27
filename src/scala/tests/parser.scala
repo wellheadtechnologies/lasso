@@ -1,6 +1,6 @@
-package org.jlas
+package com.wellhead.lasso
 import org.scalatest._
-import org.jlas.Util.time
+import Util.time
 import java.io.File
 
 class ParserTest extends FunSuite {

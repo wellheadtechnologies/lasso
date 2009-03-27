@@ -1,7 +1,7 @@
-package org.jlas
+package com.wellhead.lasso
 import java.sql.{Connection,DriverManager,ResultSet,SQLException,Statement, PreparedStatement}
 import java.io.File
-import org.jlas.Util.withConnection
+import Util.withConnection
 
 object DatabaseCreator {
   Class.forName("org.sqlite.JDBC")

@@ -1,8 +1,8 @@
 #!/bin/sh
-LASSO_CLASSPATH="/Users/nathan/projects/wellhead/lasa/build/lasa.jar"
-for file in /Users/nathan/projects/wellhead/lasa/lib/* 
+LASSO_CLASSPATH="/Users/nathan/projects/wellhead/lasso/build/lasso.jar"
+for file in /Users/nathan/projects/wellhead/lasso/lib/* 
 do
     echo $file
     LASSO_CLASSPATH=$LASSO_CLASSPATH:$file
 done;
-java -cp $LASSO_CLASSPATH org.jlas.Main "$@"
+java -cp $LASSO_CLASSPATH com.wellhead.lasso.Main "$@"

@@ -1,4 +1,4 @@
-package org.jlas
+package com.wellhead.lasso
 import org.slf4j.{Logger,LoggerFactory}
 import scala.collection.mutable.{ListBuffer}
 import java.io.{BufferedWriter,OutputStreamWriter, FileWriter}
@@ -16,9 +16,6 @@ object Main {
 	  case "database" => {
 	    val lfdb = new LasFileDB
 	    lfdb.saveLasFile(lasfile)
-	  }
-	  case "clojure" => {
-	    ClojureWriter.writeLasFile(lasfile, "parse_out.clj")
 	  }
 	}
       }

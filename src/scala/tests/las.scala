@@ -1,6 +1,6 @@
-package org.jlas
+package com.wellhead.lasso
 import org.scalatest._
-import org.jlas.Util.fun2Run
+import Util.fun2Run
 
 class CurveTest extends FunSuite {
 

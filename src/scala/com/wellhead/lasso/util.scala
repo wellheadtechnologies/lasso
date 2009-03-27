@@ -1,4 +1,4 @@
-package org.jlas
+package com.wellhead.lasso
 
 import scala.collection.jcl.Conversions._
 import scala.util.Sorting

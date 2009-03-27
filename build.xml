@@ -1,12 +1,12 @@
-<project xmlns:ivy="antlib:org.apache.ivy.ant" name="lasa" default="build">
-  <property name="revision" value="0.12" />
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="lasso" default="build">
+  <property name="revision" value="0.13" />
   <property name="ivy.settings.dir" value="../settings" />
   <property file="${ivy.settings.dir}/ivysettings.properties" />
   <property name="src.dir" value="src" />
   <property name="java.src.dir" value="${src.dir}/java" />
   <property name="scala.src.dir" value="${src.dir}/scala" />
   <property name="build.dir" value="build" />
-  <property name="jar.file" value="${build.dir}/lasa.jar" />
+  <property name="jar.file" value="${build.dir}/lasso.jar" />
   <property name="lib.dir" value="lib" />
   <property name="classes.dir" value="${build.dir}/classes" />
 

@@ -1,4 +1,4 @@
-package org.jlas
+package com.wellhead.lasso
 
 import org.slf4j.{Logger,LoggerFactory}
 import java.util.{StringTokenizer}

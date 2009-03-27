@@ -1,4 +1,4 @@
-package org.jlas
+package com.wellhead.lasso
 
 trait Descriptor {
   def getMnemonic():String

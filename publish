@@ -2,4 +2,4 @@
 
 ant publish
 cp -v lasso ../logzilla
-cp -v build/lasa.jar ../logzilla/lib/
+cp -v build/lasso.jar ../logzilla/lib/

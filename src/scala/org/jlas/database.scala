@@ -30,6 +30,7 @@ object DatabaseCreator {
   unit STRING,
   data STRING,
   description STRING,
+  isindex BOOLEAN,
   header_id INTEGER,
   FOREIGN KEY (header_id) REFERENCES headers(id)
   )
@@ -52,11 +53,15 @@ object DatabaseCreator {
   def createDB {
     withConnection("jdbc:sqlite:las.db"){ 
       connection => {
-	implicit val statement = connection.createStatement
+	val statement = connection.createStatement
 	statement.executeUpdate(create_lasfiles)
+	println("executed\n" + create_lasfiles)
 	statement.executeUpdate(create_headers)
+	println("executed\n" + create_headers)
 	statement.executeUpdate(create_descriptors)
+	println("executed\n" + create_descriptors)
 	statement.executeUpdate(create_data)
+	println("executed\n" + create_data)
       }
     }
   }
@@ -79,7 +84,8 @@ class LasFileDB {
   }
 
   def prepare_insert_descriptor_statement = {
-    connection.prepareStatement("INSERT INTO descriptors(mnemonic,unit,data,description,header_id) VALUES(?,?,?,?,?)")
+    connection.prepareStatement("INSERT INTO descriptors(mnemonic,unit,data,description,isindex,header_id)" + 
+				" VALUES(?,?,?,?,?,?)")
   }
 
   def prepare_insert_data_statement = {
@@ -132,7 +138,8 @@ class LasFileDB {
       insert_descriptor.setString(2, d.getUnit)
       insert_descriptor.setString(3, d.getData)
       insert_descriptor.setString(4, d.getDescription)
-      insert_descriptor.setString(5, h_pk.toString)
+      insert_descriptor.setBoolean(5, false)
+      insert_descriptor.setString(6, h_pk.toString)
       insert_descriptor.executeUpdate()
     }
   }
@@ -148,18 +155,16 @@ class LasFileDB {
     val h_pk = connection.createStatement.executeQuery("SELECT MAX(id) from headers").getInt(1)
     for(d <- header.getDescriptors){
       println("finding curve " + d.getMnemonic)
-      val curve = 
-	if(lasfile.getIndex.getMnemonic == d.getMnemonic) 
-	  lasfile.getIndex 
-	else 
-	  lasfile.getCurve(d.getMnemonic)
+      val isIndex = lasfile.getIndex.getMnemonic == d.getMnemonic
+      val curve = if(isIndex) lasfile.getIndex else lasfile.getCurve(d.getMnemonic)
 
       val insert_descriptor = insert_descriptor_statement
       insert_descriptor.setString(1, d.getMnemonic)
       insert_descriptor.setString(2, d.getUnit)
       insert_descriptor.setString(3, d.getData)
       insert_descriptor.setString(4, d.getDescription)
-      insert_descriptor.setString(5, h_pk.toString)
+      insert_descriptor.setBoolean(5, isIndex)
+      insert_descriptor.setString(6, h_pk.toString)
       insert_descriptor.executeUpdate()
 
       val d_pk = connection.createStatement.executeQuery("SELECT MAX(id) from descriptors").getInt(1)

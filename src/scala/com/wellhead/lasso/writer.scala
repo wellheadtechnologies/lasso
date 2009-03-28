@@ -9,7 +9,11 @@ trait LasWriter {
   def writeLasFile(lf:LasFile, path:String)
 }
 
-object LasFileWriter extends LasWriter {
+class LasFileWriter extends LasWriter {
+  val form = new DecimalFormat
+  form.setMaximumFractionDigits(20)
+  form.setMaximumIntegerDigits(20)
+  form.setGroupingUsed(false)
   
   override def writeLasFile(lf: LasFile, path:String) { 
     writeLasFile(lf, new File(path))
@@ -52,11 +56,11 @@ object LasFileWriter extends LasWriter {
     val write = (s:String) => writer.write(s)
     write(descriptor.getMnemonic)
     write(" .")
-    write(descriptor.getUnit.toString)
+    write(descriptor.getUnit)
     write(" ")
-    write(descriptor.getData.toString)
+    write(descriptor.getData)
     write(" : ")
-    write(descriptor.getDescription.toString)
+    write(descriptor.getDescription)
     writer.newLine
   }
 
@@ -71,17 +75,12 @@ object LasFileWriter extends LasWriter {
     }      
     val columns = curves.size
     val rows = curves.first.getLasData.size
-    val form = new DecimalFormat
-    form.setMaximumFractionDigits(20)
-    form.setMaximumIntegerDigits(20)
-    form.setGroupingUsed(false)
-    def row_data(r:Int) = curves.map(c => {
-      val data = c.getLasData
-      form.format(data(r))
-    })
-
     for(r <- 0 until rows){
-      writer.write(row_data(r).mkString(" "))
+      for(c <- curves){
+	val data = c.getLasData
+	writer.write(form.format(data.get(r)))
+	writer.write(" ")
+      }
       writer.newLine
     }
   }			     

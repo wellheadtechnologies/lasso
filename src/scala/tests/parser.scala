@@ -61,9 +61,10 @@ class ParserTest extends FunSuite {
   }
   
   test ("Writer should write lasfile") {
+    val writer = new LasFileWriter()
     def in_out(file:File) { 
       val lf1 = time("parsing took: ") { LasFileParser.readLasFile(file.getPath) }
-      time("writing took: ") { LasFileWriter.writeLasFile(lf1, "output_test.las") }
+      time("writing took: ") { writer.writeLasFile(lf1, "output_test.las") }
       val lf2 = time("parsing again took: ") { LasFileParser.readLasFile("output_test.las") }
       assert(lf1.contentEquals(lf2).booleanValue)
     }

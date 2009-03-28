@@ -57,24 +57,25 @@ object LasFileParser extends LasReader {
     val descriptors = curveHeader.getDescriptors
     val n = descriptors.size
     val data:Queue[Double] = parseData(reader)
-    val cdatas = Util.repeat(n, () => new LinkedList[Double])
+    val rows = data.size / n
+    val cdatas = Util.repeat(n, () => new ArrayList[Double](rows))
     while(!data.isEmpty){
       (0 until n).foreach(i => {
 	val d = data.dequeue
-	cdatas(i) += d
+	cdatas(i).add(d)
       })
     }	
     val index = WHCurve(descriptors(0), null, cdatas(0))
-    val final_curves = new LinkedList[Curve]
+    val curves = new ArrayList[Curve](n)
     (1 until n).foreach(i => {
-      final_curves.add(WHCurve(descriptors(i), index, cdatas(i)))
+      curves.add(WHCurve(descriptors(i), index, cdatas(i)))
     })
-    (index, final_curves)
+    (index, curves)
   }
 
   private def parseHeaders(reader:LineNumberReader):List[Header] = {
     val line = nextLine(reader)
-    val headers = new LinkedList[Header]()
+    val headers = new ArrayList[Header](4)
     var prefix = line.trim.take(2)
     for(i <- 0 until 4){
       val (prefix_line, descriptors) = parseDescriptors(reader)
@@ -101,7 +102,7 @@ object LasFileParser extends LasReader {
   
   private def parseDescriptors(reader:LineNumberReader) = {
     var continue = true
-    val descriptors = new LinkedList[Descriptor]
+    val descriptors = new ArrayList[Descriptor]
     var next_prefix:String = null
     while(reader.ready() && continue){
       val line = nextLine(reader)

@@ -4,7 +4,7 @@ import java.io.File
 import Util.withConnection
 import scala.collection.jcl.Conversions._
 
-object DatabaseCreator {
+object SqliteDatabaseCreator {
   Class.forName("org.sqlite.JDBC")
   val create_lasfiles = """
   CREATE TABLE lasfiles 
@@ -68,7 +68,7 @@ object DatabaseCreator {
   }
 }
 
-class LasFileDB extends LasWriter {
+class SqliteWriter extends LasWriter {
   Class.forName("org.sqlite.JDBC")
   private var connection:Connection = null
   private var insert_lasfile_statement:PreparedStatement = null
@@ -94,7 +94,7 @@ class LasFileDB extends LasWriter {
   }
 
   override def writeLasFile(lf:LasFile, path:String) { 
-    if(! (new File(path).exists)) { DatabaseCreator.createDB(path) }
+    if(! (new File(path).exists)) { SqliteDatabaseCreator.createDB(path) }
     withConnection("jdbc:sqlite:"+path){
       connection => {
 	setup(connection)
@@ -109,6 +109,12 @@ class LasFileDB extends LasWriter {
       }
     }
   } 
+
+  override def writeCurve(curve:Curve, path:String) { 
+    throw new UnsupportedOperationException("ooops, haven't implemented this yet ") 
+  }
+
+  override def canWrite(protocol:String) = protocol == "sqlite" 
 
   def setup(connection:Connection) {
     this.connection = connection

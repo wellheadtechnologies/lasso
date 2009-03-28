@@ -3,11 +3,7 @@ package com.wellhead.lasso
 import java.io._
 import java.text.DecimalFormat
 import scala.collection.jcl.Conversions._
-import java.util.{List,LinkedList}
-
-trait LasWriter {
-  def writeLasFile(lf:LasFile, path:String)
-}
+import java.util.{List,ArrayList}
 
 class LasFileWriter extends LasWriter {
   val form = new DecimalFormat
@@ -16,8 +12,19 @@ class LasFileWriter extends LasWriter {
   form.setGroupingUsed(false)
   
   override def writeLasFile(lf: LasFile, path:String) { 
-    writeLasFile(lf, new File(path))
+    if(path == "stdout"){
+      writeLasFile(lf, new BufferedWriter(new OutputStreamWriter(System.out)))
+    }
+    else {
+      writeLasFile(lf, new File(path))
+    }
   }
+  
+  override def writeCurve(curve:Curve, path:String) {
+    throw new UnsupportedOperationException("oops, haven't implemented this yet")
+  }
+
+  override def canWrite(protocol:String) = protocol == "file"
 
   private def writeLasFile(lf: LasFile, file:File) { 
     val writer = new BufferedWriter(new FileWriter(file))
@@ -68,7 +75,7 @@ class LasFileWriter extends LasWriter {
     writer.write("~A")
     writer.newLine
     val curves = {
-      val list = new LinkedList[Curve]
+      val list = new ArrayList[Curve]
       list.add(lf.getIndex)
       lf.getCurves.foreach(c => list.add(c))
       list
@@ -87,11 +94,22 @@ class LasFileWriter extends LasWriter {
     
 }
 
-object ClojureWriter extends LasWriter {
+class ClojureWriter extends LasWriter {
 
   override def writeLasFile(lf: LasFile, path:String) { 
-    writeLasFile(lf, new File(path))
+    if(path == "stdout"){
+      writeLasFile(lf, new BufferedWriter(new OutputStreamWriter(System.out)))
+    }
+    else {
+      writeLasFile(lf, new File(path))
+    }
   }
+
+  override def writeCurve(curve:Curve, path:String) { 
+    throw new UnsupportedOperationException("oops, haven't implemented this yet")
+  }
+  
+  override def canWrite(protocol:String) = protocol == "clojure"
 
   private def writeLasFile(lf: LasFile, file:File) { 
     val writer = new BufferedWriter(new FileWriter(file))
@@ -102,10 +120,14 @@ object ClojureWriter extends LasWriter {
     val write = (s:String) => writer.write(s)
     try {
       write("{")
-      write(":headers ")
-      writeHeaders(lf, writer)
-      
+      write(":name ")
+      write(lf.getName)
       write(", ")
+
+      write(":headers ")
+      writeHeaders(lf, writer)      
+      write(", ")
+
       write(":curves ")
       writeCurves(lf, writer)
       write("}")

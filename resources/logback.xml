@@ -1,0 +1,12 @@
+<configuration>
+  <appender name="LOG_OUT" class="ch.qos.logback.core.FileAppender">    
+    <File>log.txt</File>
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <Pattern>[%thread] %-5level %logger{36} - %msg%n</Pattern>
+    </layout>
+  </appender>
+
+  <root level="debug">
+    <appender-ref ref="LOG_OUT" />
+  </root>
+</configuration>

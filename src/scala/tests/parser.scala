@@ -6,9 +6,10 @@ import scala.collection.jcl.Conversions._
 
 class ParserTest extends FunSuite {
   def not_null[A](x:A) { assert(x != null, "something was null") }
+  val parser = new LasFileParser
 
   test("Parser should parse test.las") {
-    val lf = LasFileParser.readLasFile("las_files/test.las")
+    val lf = parser.readLasFile("las_files/test.las")
     val dept = lf.getIndex
     val gamma = lf.getCurve("Gamma")
     val porosity = lf.getCurve("Porosity")
@@ -26,7 +27,7 @@ class ParserTest extends FunSuite {
   }
 
   test ("Parser should parse dollie.las"){ 
-    val lf = LasFileParser.readLasFile("las_files/dollie.las")
+    val lf = parser.readLasFile("las_files/dollie.las")
     val dept = lf.getIndex
     val wtoc = lf.getCurve("WTOC")
     not_null(dept)
@@ -41,7 +42,7 @@ class ParserTest extends FunSuite {
   }
 
   test ("Parser should parse x4.las") {
-    val lf = LasFileParser.readLasFile("las_files/x4.las")
+    val lf = parser.readLasFile("las_files/x4.las")
     val wh = lf.getWellHeader
     val strt = wh.getDescriptor("STRT").getData
     val stop = wh.getDescriptor("STOP").getData
@@ -56,16 +57,16 @@ class ParserTest extends FunSuite {
     val directory = new File("las_files")
     val files = directory.listFiles
     for(file <- files){ 
-      LasFileParser.readLasFile(file.getPath)
+      parser.readLasFile(file.getPath)
     }
   }
   
   test ("Writer should write lasfile") {
     val writer = new LasFileWriter()
     def in_out(file:File) { 
-      val lf1 = time("parsing took: ") { LasFileParser.readLasFile(file.getPath) }
+      val lf1 = time("parsing took: ") { parser.readLasFile(file.getPath) }
       time("writing took: ") { writer.writeLasFile(lf1, "output_test.las") }
-      val lf2 = time("parsing again took: ") { LasFileParser.readLasFile("output_test.las") }
+      val lf2 = time("parsing again took: ") { parser.readLasFile("output_test.las") }
       assert(lf1.contentEquals(lf2).booleanValue)
     }
     val directory = new File("las_files")

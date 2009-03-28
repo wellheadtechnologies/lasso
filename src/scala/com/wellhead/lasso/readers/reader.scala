@@ -7,12 +7,7 @@ import scala.collection.jcl.Conversions._
 import java.lang.Double
 import Util._
 
-trait LasReader {
-  def readLasFile(path:String):LasFile
-  def canRead(path:String):Boolean
-}
-
-object LasFileParser extends LasReader {
+class LasFileParser extends LasReader {
 
   private val header_prefixes = Map("~V" -> "VersionHeader",
 				    "~W" -> "WellHeader",
@@ -23,12 +18,14 @@ object LasFileParser extends LasReader {
   
   private val logger = LoggerFactory.getLogger("LasFileParser")
 
-  override def canRead(path:String):Boolean = {
-    (new File(path)).exists()
-  }
+  override def canRead(protocol:String):java.lang.Boolean = protocol == "file"
 
   override def readLasFile(path:String):LasFile = {
     parseLasFile(new File(path))
+  }
+
+  override def readCurve(path:String, name:String):Curve = {
+    throw new UnsupportedOperationException("oops, haven't implemented this yet")
   }
 
   private def parseLasFile(path:String):LasFile = {

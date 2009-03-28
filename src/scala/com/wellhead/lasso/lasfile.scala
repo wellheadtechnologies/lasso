@@ -18,7 +18,13 @@ final class WHLasFile extends LasFile {
   override def getName = name
   override def getCurves = curves
   override def getIndex = index
-  override def getCurve(mnemonic:String) = curves.find(_.getMnemonic == mnemonic).get
+  override def getCurve(mnemonic:String) = {
+    if(getIndex.getMnemonic == mnemonic) {
+      index
+    } else {
+      curves.find(_.getMnemonic == mnemonic).get
+    }
+  }
   override def getVersionHeader = versionHeader
   override def getWellHeader = wellHeader
   override def getCurveHeader = curveHeader

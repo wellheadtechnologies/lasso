@@ -106,7 +106,22 @@ class ClojureWriter extends LasWriter {
   }
 
   override def writeCurve(curve:Curve, path:String) { 
-    throw new UnsupportedOperationException("oops, haven't implemented this yet")
+    if(path == "stdout"){
+      val writer = new BufferedWriter(new OutputStreamWriter(System.out))
+      try {
+	writeCurve(curve, writer)
+      } finally {
+	writer.close()
+      }
+    }
+    else {
+      val writer = new BufferedWriter(new FileWriter(path))
+      try {
+	writeCurve(curve, writer)
+      } finally {
+	writer.close()
+      }
+    }
   }
   
   override def canWrite(protocol:String) = protocol == "clojure"

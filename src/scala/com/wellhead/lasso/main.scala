@@ -16,6 +16,18 @@ object Main {
       val lasfiles = readSources(sources.toList)
       writeLasFiles(lasfiles, destination)
     }
+    else if(cmd == "pad"){
+      val (source1,indexName) = extractFileCurve(args(0))
+      val (source2,curveName) = extractFileCurve(args(1))
+      val destination = args(2)
+      val lasfiles = readSources(source1 :: source2 :: Nil)
+      val lf1 = lasfiles.first
+      val lf2 = lasfiles(1)
+      val index = lf1.getCurve(indexName)
+      val curve = lf2.getCurve(curveName)
+      val padded = WHCurve.adjustCurve(index, curve)
+      writeCurve(padded, destination)
+    }
     else {
       throw new UnsupportedOperationException("ooops, haven't implemented this yet")
     }
@@ -56,7 +68,7 @@ object Main {
     })
   }
   lazy val writers = {
-    val ws =(manifest \\ "writer").map(w => {
+    val ws = (manifest \\ "writer").map(w => {
       val clazzName = w.attribute("class").get.text
       val clazz = Class.forName(clazzName)
       clazz.newInstance.asInstanceOf[LasWriter]
@@ -72,7 +84,19 @@ object Main {
     }
   }
 
-  def resolveCurve(path:String):Curve = null
-  def writeCurve(curve:Curve, path:String) { }
+  def writeCurve(curve:Curve, destination:String) { 
+    resolveWriter(protocolOf(destination)) match {
+      case Some(w) => w.writeCurve(curve, pathOf(destination))
+      case None => throw new RuntimeException("no writer found for destination : " + 
+					      destination + " with proto: " + protocolOf(destination))
+    }
+  }
+
+  def extractFileCurve(path:String) = {
+    val curve = path.reverse.takeWhile(_ != '/').reverse.mkString
+    val file = path.reverse.dropWhile(_ != '/').drop(1).reverse.mkString
+    (file, curve)
+  }
+    
 }
 

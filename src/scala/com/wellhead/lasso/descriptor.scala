@@ -1,64 +1,37 @@
 package com.wellhead.lasso
 
-trait Descriptor {
-  def getMnemonic():String
-  def getUnit():String
-  def getData():String
-  def getDescription():String
-  override def equals(_that:Any):Boolean = {
-    if(!_that.isInstanceOf[Descriptor]) return false
-    val that = _that.asInstanceOf[Descriptor]
-    if(that.getMnemonic != this.getMnemonic) return false
-    if(that.getUnit != this.getUnit) return false
-    if(that.getData != this.getData) return false
-    if(that.getDescription != this.getDescription) return false
-    return true
-  }
-}
-
-trait IsMutableDescriptor extends Descriptor {
-  def setMnemonic(s:String)
-  def setUnit(a:String)
-  def setData(a:String)
-  def setDescription(s:String)
-}
-
-final class ImmutableDescriptor(mnemonic:String, unit:String, data:String, description:String)
-extends Descriptor {
+final class WHDescriptor extends Descriptor {
+  var mnemonic:String = null
+  var unit:String = null
+  var data:String = null
+  var description:String = null
   override def getMnemonic = mnemonic
   override def getUnit = unit
   override def getData = data
   override def getDescription = description
+  override def setMnemonic(mnemonic:String) { this.mnemonic = mnemonic }
+  override def setUnit(unit:String) { this.unit = unit }
+  override def setData(data:String) { this.data = data }
+  override def setDescription(description:String) { this.description = description }
   override def toString = mnemonic + " " + unit + " " + data + " " + description
+  override def equals(_that:Any):Boolean = {
+    if(!_that.isInstanceOf[Descriptor]) return false
+    val that = _that.asInstanceOf[Descriptor]
+    if(this.getMnemonic != that.getMnemonic || 
+       this.getUnit != that.getUnit || 
+       this.getData != that.getData ||
+       this.getDescription != that.getDescription) return false
+    return true
+  }
 }
-  
-final class MutableDescriptor(private var mnemonic:String,
-			      private var unit:String,
-			      private var data:String,
-			      private var description:String)
-extends IsMutableDescriptor with MutexLocked {
-  override def getMnemonic = guardLock { mnemonic }
-  override def getUnit = guardLock { unit }
-  override def getData = guardLock { data }
-  override def getDescription = guardLock { description }
 
-  override def setMnemonic(m:String) {
-    guardLock { this.mnemonic = m }
+object WHDescriptor {
+  def apply(mnemonic:String, unit:String, data:String, description:String) = {
+    val descriptor = new WHDescriptor
+    descriptor.setMnemonic(mnemonic)
+    descriptor.setUnit(unit)
+    descriptor.setData(data)
+    descriptor.setDescription(description)
+    descriptor 
   }
-
-  override def setUnit(u:String) { 
-    guardLock { this.unit = u }
-  }
-
-  override def setData(d:String) {
-    guardLock { this.data = d }
-  }
-
-  override def setDescription(d:String) { 
-    guardLock { this.description = d }
-  }
-
-  override def toString = guardLock { mnemonic + " " + unit + " " + data + " " + description }
-
-  override def equals(that:Any) = guardLock { super.equals(that) }
 }

@@ -2,6 +2,7 @@ package com.wellhead.lasso
 import java.sql.{Connection,DriverManager,ResultSet,SQLException,Statement, PreparedStatement}
 import java.io.File
 import Util.withConnection
+import scala.collection.jcl.Conversions._
 
 object DatabaseCreator {
   Class.forName("org.sqlite.JDBC")
@@ -50,8 +51,8 @@ object DatabaseCreator {
     statement.executeUpdate(s)
   }
 
-  def createDB {
-    withConnection("jdbc:sqlite:las.db"){ 
+  def createDB(path:String) {
+    withConnection("jdbc:sqlite:"+path){ 
       connection => {
 	val statement = connection.createStatement
 	statement.executeUpdate(create_lasfiles)
@@ -67,7 +68,7 @@ object DatabaseCreator {
   }
 }
 
-class LasFileDB {
+class LasFileDB extends LasWriter {
   Class.forName("org.sqlite.JDBC")
   private var connection:Connection = null
   private var insert_lasfile_statement:PreparedStatement = null
@@ -92,17 +93,9 @@ class LasFileDB {
     connection.prepareStatement("INSERT INTO data(row,value,descriptor_id) VALUES(?,?,?)")
   }
 
-  def setup(connection:Connection) {
-    this.connection = connection
-    insert_lasfile_statement = prepare_insert_lasfile_statement
-    insert_header_statement = prepare_insert_header_statement
-    insert_descriptor_statement = prepare_insert_descriptor_statement
-    insert_data_statement = prepare_insert_data_statement
-  }
-
-  def saveLasFile(lf:LasFile) { 
-    if(! (new File("las.db").exists)) { DatabaseCreator.createDB }
-    withConnection("jdbc:sqlite:las.db"){
+  override def writeLasFile(lf:LasFile, path:String) { 
+    if(! (new File(path).exists)) { DatabaseCreator.createDB(path) }
+    withConnection("jdbc:sqlite:"+path){
       connection => {
 	setup(connection)
 	val statement = connection.createStatement
@@ -116,6 +109,14 @@ class LasFileDB {
       }
     }
   } 
+
+  def setup(connection:Connection) {
+    this.connection = connection
+    insert_lasfile_statement = prepare_insert_lasfile_statement
+    insert_header_statement = prepare_insert_header_statement
+    insert_descriptor_statement = prepare_insert_descriptor_statement
+    insert_data_statement = prepare_insert_data_statement
+  }
 
   def insertHeaders(lf_pk:Integer, lasfile:LasFile){
     insertHeader(lf_pk, lasfile.getVersionHeader)

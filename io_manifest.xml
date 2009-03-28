@@ -1,0 +1,8 @@
+<io-manifest>
+  <readers>
+    <reader class="com.wellhead.lasso.LasFileParser" />
+  </readers>
+  <writers>
+    <writer class="com.wellhead.lasso.LasFileWriter" />
+  </writers>
+</io-manifest>

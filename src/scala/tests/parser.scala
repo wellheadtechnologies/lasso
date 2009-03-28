@@ -2,12 +2,13 @@ package com.wellhead.lasso
 import org.scalatest._
 import Util.time
 import java.io.File
+import scala.collection.jcl.Conversions._
 
 class ParserTest extends FunSuite {
   def not_null[A](x:A) { assert(x != null, "something was null") }
 
   test("Parser should parse test.las") {
-    val lf = DefaultLasParser.parseLasFile("las_files/test.las")
+    val lf = LasFileParser.readLasFile("las_files/test.las")
     val dept = lf.getIndex
     val gamma = lf.getCurve("Gamma")
     val porosity = lf.getCurve("Porosity")
@@ -25,7 +26,7 @@ class ParserTest extends FunSuite {
   }
 
   test ("Parser should parse dollie.las"){ 
-    val lf = DefaultLasParser.parseLasFile("las_files/dollie.las")
+    val lf = LasFileParser.readLasFile("las_files/dollie.las")
     val dept = lf.getIndex
     val wtoc = lf.getCurve("WTOC")
     not_null(dept)
@@ -40,7 +41,7 @@ class ParserTest extends FunSuite {
   }
 
   test ("Parser should parse x4.las") {
-    val lf = DefaultLasParser.parseLasFile("las_files/x4.las")
+    val lf = LasFileParser.readLasFile("las_files/x4.las")
     val wh = lf.getWellHeader
     val strt = wh.getDescriptor("STRT").getData
     val stop = wh.getDescriptor("STOP").getData
@@ -55,16 +56,16 @@ class ParserTest extends FunSuite {
     val directory = new File("las_files")
     val files = directory.listFiles
     for(file <- files){ 
-      DefaultLasParser.parseLasFile(file)
+      LasFileParser.readLasFile(file.getPath)
     }
   }
   
   test ("Writer should write lasfile") {
     def in_out(file:File) { 
-      val lf1 = time("parsing took: ") { DefaultLasParser.parseLasFile(file) }
-      time("writing took: ") { DefaultLasWriter.writeLasFile(lf1, "output_test.las") }
-      val lf2 = time("parsing again took: ") { DefaultLasParser.parseLasFile("output_test.las") }
-      assert(lf1 === lf2)
+      val lf1 = time("parsing took: ") { LasFileParser.readLasFile(file.getPath) }
+      time("writing took: ") { LasFileWriter.writeLasFile(lf1, "output_test.las") }
+      val lf2 = time("parsing again took: ") { LasFileParser.readLasFile("output_test.las") }
+      assert(lf1.contentEquals(lf2).booleanValue)
     }
     val directory = new File("las_files")
     var i = 0
@@ -76,3 +77,4 @@ class ParserTest extends FunSuite {
     }
   }
 }
+

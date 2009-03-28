@@ -2,59 +2,14 @@ package com.wellhead.lasso
 import Util._
 import org.slf4j.{Logger,LoggerFactory}
 import java.util.concurrent.locks.{ReadWriteLock, ReentrantReadWriteLock}
+import scala.collection.jcl.Conversions._
+import java.util.{List, Collections, ArrayList, LinkedList}
+import java.lang.Double
 
-trait Curve {
-  def getDescriptor():Descriptor
-  def getLasData():List[Double]
-  def getIndex():Curve
-  def getMnemonic():String
-  def getUnit():Any
-  def getData():Any
-  def getDescription():String
-  def sampleRate():Double
-  def adjustedCurve(pindex:Curve):Curve
-
-  val logger = LoggerFactory.getLogger("org.jlas.Curve")
-
-  override def equals(_that:Any):Boolean = {
-    logger.debug("testing curve equality for {}", this.getMnemonic)
-    if(!_that.isInstanceOf[Curve]) {
-      logger.debug("{} is not an instance of Curve", _that)
-      return false
-    }
-    val that = _that.asInstanceOf[Curve]
-    logger.debug("testing descriptors")
-    if(this.getDescriptor != that.getDescriptor){
-      logger.debug("descriptors: {} != {}", this.getDescriptor, that.getDescriptor)
-      return false
-    }
-    logger.debug("testing lasdata")
-    if(this.getLasData == null || that.getLasData == null){
-      logger.debug("lasdata is null")
-      return false
-    }
-    val size = this.getLasData.size
-    if(size != that.getLasData.size){
-      logger.debug("data-sizes: {} != {}", size, that.getLasData.size)
-      return false
-    }
-    if(this.getLasData != that.getLasData){
-      logger.debug("las data not equal!")
-      return false
-    }
-    logger.debug("curves equal")
-    return true
-  }
-}
-
-trait IsMutableCurve extends Curve {
-  def setDescriptor(d:Descriptor)
-  def setLasData(d:List[Double])
-  def setIndex(c:Curve)
-}
-
-//Assumption of Immutability
-final class ImmutableCurve(descriptor:Descriptor, index:Curve, data:List[Double]) extends Curve {
+final class WHCurve extends Curve {
+  private var descriptor:Descriptor = null
+  private var data:List[Double] = null
+  private var index:Curve = null
   override def getDescriptor = descriptor
   override def getLasData = data
   override def getIndex = index
@@ -62,46 +17,38 @@ final class ImmutableCurve(descriptor:Descriptor, index:Curve, data:List[Double]
   override def getUnit = descriptor.getUnit
   override def getData = descriptor.getData
   override def getDescription = descriptor.getDescription
+
+  override def setDescriptor(descriptor:Descriptor) { this.descriptor = descriptor }
+  override def setLasData(data:List[Double]) { this.data = data }
+  override def setIndex(index:Curve) { this.index = index }
+  override def setMnemonic(m:String) { getDescriptor.setMnemonic(m) }
+  override def setUnit(m:String) { getDescriptor.setUnit(m) }
+  override def setData(m:String) { getDescriptor.setData(m) }
+  override def setDescription(m:String) { getDescriptor.setDescription(m) }
+
   override def toString = getMnemonic + " " + getLasData.size
-  override def sampleRate = Curve.sampleRate(this)
-  override def adjustedCurve(pindex:Curve):Curve = Curve.adjustCurve(pindex, this)
+  override def equals(_that:Any):Boolean = {
+    if(!_that.isInstanceOf[Curve]) return false
+    val that = _that.asInstanceOf[Curve]
+    if(this.getDescriptor != that.getDescriptor ||
+       this.getLasData != that.getLasData ||
+       this.getIndex != that.getIndex) return false
+    return true
+  }
 }
 
-final class MutableCurve(private var descriptor:Descriptor,
-			 private var index:Curve,
-			 private var data:List[Double])
-extends IsMutableCurve with MutexLocked {
-  import Curve._
-  override def getDescriptor = guardLock { descriptor }
-  override def setDescriptor(d:Descriptor) {
-    guardLock { this.descriptor = d }
+object WHCurve {
+  implicit def double2Double(d:java.lang.Double):scala.Double = d.doubleValue
+  implicit def Doubl2double(d:scala.Double):java.lang.Double = new Double(d)
+
+  def apply(descriptor:Descriptor, index:Curve, data:List[Double]):WHCurve = {
+    val curve = new WHCurve
+    curve.setDescriptor(descriptor)
+    curve.setIndex(index)
+    curve.setLasData(data)
+    curve
   }
 
-  override def getLasData = guardLock { data }
-  override def setLasData(d:List[Double]){
-    guardLock { this.data = d }
-  }
-
-  override def getIndex = guardLock { index }
-  override def setIndex(c:Curve) {
-    guardLock { this.index = c }
-  }
-  override def getMnemonic = guardLock { descriptor.getMnemonic }
-  override def getUnit = guardLock { descriptor.getUnit }
-  override def getData = guardLock { descriptor.getData }
-  override def getDescription = guardLock { descriptor.getDescription }
-
-  override def toString = guardLock { getMnemonic + " " + getLasData.size }
-
-  override def equals(that:Any) = guardLock { super.equals(that) }
-
-  override def sampleRate = guardLock { Curve.sampleRate(this) }
-
-  override def adjustedCurve(pindex:Curve):Curve = guardLock { adjustCurve(pindex, this) }
-}
-  
-
-object Curve {
   //assumes smallToLarge order
   def startOffset(pindex:List[Double], index:List[Double], srate:Double):Int = {
     ((pindex.first - index.first).abs / srate).intValue
@@ -114,7 +61,7 @@ object Curve {
 
   def replaceNullWithNaN(list:List[Double]) = {
     list.map(d => {
-      val diff = (d.abs - 999.25).abs
+      val diff = Math.abs(Math.abs(d) - 999.25)
       if(d < 0 && diff < 0.00001) java.lang.Double.NaN else d
     })
   }
@@ -125,22 +72,27 @@ object Curve {
     val idata = index.getLasData
     val first = idata(0)
     val second = idata(1)
-    val rate = first - second 
+    val rate = first.doubleValue - second.doubleValue
     rate.abs
   }
 
   def adjustCurve(pindex:Curve, curve:Curve) = {
-    val pdata = smallToLarge(pindex.getLasData)
-    val cidata = smallToLarge(curve.getLasData)
-    val start_offset = startOffset(pdata, cidata, curve.sampleRate)
-    val end_offset = endOffset(pdata, cidata, curve.sampleRate)
-    val startPadding = repeat(start_offset, () => java.lang.Double.NaN)
-    val endPadding = repeat(end_offset, () => java.lang.Double.NaN)
-    new ImmutableCurve(
-      curve.getDescriptor,
-      pindex,
-      startPadding.concat(
-	replaceNullWithNaN(curve.getLasData).concat(endPadding)).toList
-    )
+    val pdata = pindex.getLasData
+    val cidata = curve.getIndex.getLasData
+    Collections.sort(pdata)
+    Collections.sort(cidata)
+    val start_offset = startOffset(pdata, cidata, WHCurve.sampleRate(curve))
+    val end_offset = endOffset(pdata, cidata, WHCurve.sampleRate(curve))
+    WHCurve(curve.getDescriptor, pindex,
+	    padData(start_offset, end_offset, curve.getLasData))
   }
+
+  def padData(startPadding:Int, endPadding:Int, data:List[Double]) = {
+    val newData = new ArrayList[Double]
+    for(nan <- repeat(startPadding, () => Double.NaN)) newData.add(nan)
+    for(datum <- data) newData.add(datum)
+    for(nan <- repeat(endPadding, () => Double.NaN)) newData.add(nan)
+    newData
+  }
+    
 }

@@ -34,8 +34,7 @@
   </target>
 
   <target name="build" depends="clean, init">
-    <echo>building scala</echo>
-    <scalac srcdir="${scala.src.dir}" destdir="${classes.dir}">
+    <scalac srcdir="${src.dir}" destdir="${classes.dir}">
       <classpath>
 	<fileset dir="${lib.dir}">
 	  <include name="**/*.jar" />
@@ -44,7 +43,19 @@
 	  <include name="**/*.class" />
 	</fileset>
       </classpath>
+      <include name="scala/**/*.scala" />
+      <include name="java/**/*.java" />
     </scalac>
+    <javac srcdir="${java.src.dir}" destdir="${classes.dir}">
+      <classpath>
+	<fileset dir="${lib.dir}">
+	  <include name="**/*.jar" />
+	</fileset>
+	<fileset dir="${build.dir}">
+	  <include name="**/*.class" />
+	</fileset>
+      </classpath>
+    </javac>
   </target>
 
   <target name="jar" depends="build">

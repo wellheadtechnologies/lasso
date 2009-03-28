@@ -2,25 +2,25 @@ package com.wellhead.lasso
 
 import java.io._
 import java.text.DecimalFormat
+import scala.collection.jcl.Conversions._
+import java.util.{List,LinkedList}
 
 trait LasWriter {
   def writeLasFile(lf:LasFile, path:String)
-  def writeLasFile(lf:LasFile, file:File)
-  def writeLasFile(lf:LasFile, writer:BufferedWriter)
 }
 
-object DefaultLasWriter extends LasWriter {
-
-  override def writeLasFile(lf: LasFile, file:File) { 
-    val writer = new BufferedWriter(new FileWriter(file))
-    writeLasFile(lf, writer)
-  }
-
+object LasFileWriter extends LasWriter {
+  
   override def writeLasFile(lf: LasFile, path:String) { 
     writeLasFile(lf, new File(path))
   }
 
-  override def writeLasFile(lf:LasFile, writer:BufferedWriter) {
+  private def writeLasFile(lf: LasFile, file:File) { 
+    val writer = new BufferedWriter(new FileWriter(file))
+    writeLasFile(lf, writer)
+  }
+
+  private def writeLasFile(lf:LasFile, writer:BufferedWriter) {
     val write = (s:String) => writer.write(s)
     try {
       writeHeaders(lf, writer)
@@ -39,8 +39,7 @@ object DefaultLasWriter extends LasWriter {
 
   private def writeHeader(h:Header, writer:BufferedWriter) {
     writer.write(h.getPrefix); writer.newLine
-    writeDescriptors(h.getDescriptors,
-		     writer)
+    writeDescriptors(h.getDescriptors, writer)
   }
 
   private def writeDescriptors(descriptors:List[Descriptor], writer: BufferedWriter){
@@ -64,7 +63,12 @@ object DefaultLasWriter extends LasWriter {
   private def writeCurves(lf: LasFile, writer: BufferedWriter) {
     writer.write("~A")
     writer.newLine
-    val curves =  lf.getIndex :: lf.getCurves
+    val curves = {
+      val list = new LinkedList[Curve]
+      list.add(lf.getIndex)
+      lf.getCurves.foreach(c => list.add(c))
+      list
+    }      
     val columns = curves.size
     val rows = curves.first.getLasData.size
     val form = new DecimalFormat
@@ -86,16 +90,16 @@ object DefaultLasWriter extends LasWriter {
 
 object ClojureWriter extends LasWriter {
 
-  override def writeLasFile(lf: LasFile, file:File) { 
-    val writer = new BufferedWriter(new FileWriter(file))
-    writeLasFile(lf, writer)
-  }
-
   override def writeLasFile(lf: LasFile, path:String) { 
     writeLasFile(lf, new File(path))
   }
 
-  override def writeLasFile(lf:LasFile, writer:BufferedWriter) {
+  private def writeLasFile(lf: LasFile, file:File) { 
+    val writer = new BufferedWriter(new FileWriter(file))
+    writeLasFile(lf, writer)
+  }
+
+  private def writeLasFile(lf:LasFile, writer:BufferedWriter) {
     val write = (s:String) => writer.write(s)
     try {
       write("{")

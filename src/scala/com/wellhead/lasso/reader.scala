@@ -1,17 +1,18 @@
 package com.wellhead.lasso
-
 import org.slf4j.{Logger,LoggerFactory}
-import java.util.{StringTokenizer}
+import java.util.{StringTokenizer, LinkedList,ArrayList, List}
 import java.io.{File, FileReader, BufferedReader, LineNumberReader}
 import scala.collection.mutable.{Queue,ListBuffer}
+import scala.collection.jcl.Conversions._
+import java.lang.Double
+import Util._
 
-trait LasParser {
-  def parseLasFile(path:String):LasFile
-  def parseLasFile(file:File):LasFile
+trait LasReader {
+  def readLasFile(path:String):LasFile
+  def canRead(path:String):Boolean
 }
-  
 
-object DefaultLasParser extends LasParser {
+object LasFileParser extends LasReader {
 
   private val header_prefixes = Map("~V" -> "VersionHeader",
 				    "~W" -> "WellHeader",
@@ -20,20 +21,28 @@ object DefaultLasParser extends LasParser {
 
   private val white_space = "\n\r\t "
   
-  private val logger = LoggerFactory.getLogger("core.LasParser")
+  private val logger = LoggerFactory.getLogger("LasFileParser")
 
-  override def parseLasFile(path:String) = {
+  override def canRead(path:String):Boolean = {
+    (new File(path)).exists()
+  }
+
+  override def readLasFile(path:String):LasFile = {
     parseLasFile(new File(path))
   }
 
-  override def parseLasFile(file:File) = {
+  private def parseLasFile(path:String):LasFile = {
+    parseLasFile(new File(path))
+  }
+
+  private def parseLasFile(file:File):LasFile = {
     logger.info("Parsing {}", file.getName)
     var reader = new LineNumberReader(new FileReader(file))
     try {
       val headers = parseHeaders(reader)
       val curveHeader = headers.find(_.getType == "CurveHeader").get
       val (index, curves) = parseCurves(curveHeader, reader)
-      new ImmutableLasFile(file.getName, headers, index, curves)
+      WHLasFile(file.getName, headers, index, curves)
     } catch {
       case e => 
 	logger.error("parser failed at line number : " + reader.getLineNumber)
@@ -48,31 +57,32 @@ object DefaultLasParser extends LasParser {
     val descriptors = curveHeader.getDescriptors
     val n = descriptors.size
     val data:Queue[Double] = parseData(reader)
-    val cdatas = Util.repeat(n, () => new ListBuffer[Double])
+    val cdatas = Util.repeat(n, () => new LinkedList[Double])
     while(!data.isEmpty){
       (0 until n).foreach(i => {
 	val d = data.dequeue
 	cdatas(i) += d
       })
     }	
-    val index = new ImmutableCurve(descriptors(0), null, cdatas(0).toList)
-    val final_curves = (1 until n).map(i => {
-      new ImmutableCurve(descriptors(i), index, cdatas(i).toList)
-    }).toList
+    val index = WHCurve(descriptors(0), null, cdatas(0))
+    val final_curves = new LinkedList[Curve]
+    (1 until n).foreach(i => {
+      final_curves.add(WHCurve(descriptors(i), index, cdatas(i)))
+    })
     (index, final_curves)
   }
 
   private def parseHeaders(reader:LineNumberReader):List[Header] = {
     val line = nextLine(reader)
-    val headers = new ListBuffer[Header]()
+    val headers = new LinkedList[Header]()
     var prefix = line.trim.take(2)
     for(i <- 0 until 4){
       val (prefix_line, descriptors) = parseDescriptors(reader)
       val htype = header_prefixes(prefix)
-      headers += new ImmutableHeader(htype, prefix, descriptors)
+      headers += WHHeader(htype, prefix, descriptors)
       prefix = prefix_line.trim.take(2)
     }
-    return headers.toList
+    return headers
   }
 
   private def parseData(reader:LineNumberReader):Queue[Double] = {
@@ -91,7 +101,7 @@ object DefaultLasParser extends LasParser {
   
   private def parseDescriptors(reader:LineNumberReader) = {
     var continue = true
-    val descriptors = new ListBuffer[Descriptor]
+    val descriptors = new LinkedList[Descriptor]
     var next_prefix:String = null
     while(reader.ready() && continue){
       val line = nextLine(reader)
@@ -100,10 +110,10 @@ object DefaultLasParser extends LasParser {
 	next_prefix = line
       }
       else {
-	descriptors += parseDescriptor(line)
+	descriptors.add(parseDescriptor(line))
       }
     }
-    (next_prefix, descriptors.toList)
+    (next_prefix, descriptors)
   }
 
   private def parseDescriptor(line1:String):Descriptor = {
@@ -116,7 +126,7 @@ object DefaultLasParser extends LasParser {
     val colon = line3.lastIndexOf(':')
     val data = line3.substring(0, colon)
     val description = line3.substring(colon+1)
-    return new ImmutableDescriptor(mnemonic.trim, unit.trim, data.trim, description.trim)
+    return WHDescriptor(mnemonic.trim, unit.trim, data.trim, description.trim)
   }
 
   private def isComment(line:String) = line.startsWith("#") || line.trim.startsWith("#")

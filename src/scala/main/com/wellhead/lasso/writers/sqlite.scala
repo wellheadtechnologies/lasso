@@ -56,13 +56,9 @@ object SqliteDatabaseCreator {
       connection => {
 	val statement = connection.createStatement
 	statement.executeUpdate(create_lasfiles)
-	println("executed\n" + create_lasfiles)
 	statement.executeUpdate(create_headers)
-	println("executed\n" + create_headers)
 	statement.executeUpdate(create_descriptors)
-	println("executed\n" + create_descriptors)
 	statement.executeUpdate(create_data)
-	println("executed\n" + create_data)
       }
     }
   }
@@ -161,7 +157,6 @@ class SqliteWriter extends LasWriter {
 
     val h_pk = connection.createStatement.executeQuery("SELECT MAX(id) from headers").getInt(1)
     for(d <- header.getDescriptors){
-      println("finding curve " + d.getMnemonic)
       val isIndex = lasfile.getIndex.getMnemonic == d.getMnemonic
       val curve = if(isIndex) lasfile.getIndex else lasfile.getCurve(d.getMnemonic)
 

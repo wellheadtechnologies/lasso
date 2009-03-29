@@ -14,5 +14,14 @@ class LassoTest extends FunSuite {
   test("lasso pad las_files/test.las/DEPT las_files/test2.las/Facies clojure://padded.clj"){
     Main.main("pad las_files/test.las/DEPT las_files/test2.las/Facies clojure://padded.clj".split(" "))
   }
+  test("writing and reading clojure") {
+    val writer = new ClojureWriter
+    val reader = new ClojureReader
+    val lfreader = new LasFileReader
+    val lf = lfreader.readLasFile("las_files/test.las")
+    writer.writeLasFile(lf, "test_output.clj")
+    val lf2 = reader.readLasFile("test_output.clj")
+    assert(lf.contentEquals(lf2))
+  }
 }
 

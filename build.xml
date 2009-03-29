@@ -5,6 +5,7 @@
   <property name="src.dir" value="src" />
   <property name="java.src.dir" value="${src.dir}/java" />
   <property name="scala.src.dir" value="${src.dir}/scala" />
+  <property name="clojure.src.dir" value="${src.dir}/clojure" />
   <property name="build.dir" value="build" />
   <property name="jar.file" value="${build.dir}/lasso.jar" />
   <property name="lib.dir" value="lib" />
@@ -35,17 +36,19 @@
     <delete dir="${build.dir}"/>
   </target>
 
-  <target name="build" depends="clean, init">
+  <path id="java_scala.classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+    </fileset>
+    <fileset dir="${build.dir}">
+      <include name="**/*.class" />
+    </fileset>
+  </path>
+
+  <target name="build-core" depends="clean,init">
     <scalac srcdir="${src.dir}" destdir="${classes.dir}">
-      <classpath>
-	<fileset dir="${lib.dir}">
-	  <include name="**/*.jar" />
-	</fileset>
-	<fileset dir="${build.dir}">
-	  <include name="**/*.class" />
-	</fileset>
-      </classpath>
-      <include name="scala/**/*.scala" />
+      <classpath refid="java_scala.classpath" />
+      <include name="scala/com/**/*.scala" />
       <include name="java/**/*.java" />
     </scalac>
     <javac srcdir="${java.src.dir}" destdir="${classes.dir}">
@@ -58,6 +61,17 @@
 	</fileset>
       </classpath>
     </javac>
+    <java classname="clojure.lang.Compile" fork="true">
+      <classpath>
+	<fileset dir="${lib.dir}">
+	  <include name="**/*.jar" />
+	</fileset>
+	<path location="${classes.dir}" />
+	<path location="${clojure.src.dir}" />
+      </classpath>
+      <jvmarg value="-Dclojure.compile.path=${classes.dir}" />
+      <arg value="com.wellhead.lasso.ClojureReader" />
+    </java>
     <copy todir="${resources.dir}" file="resources/logback.xml" />
   </target>
 

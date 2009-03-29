@@ -24,7 +24,7 @@ class LasFileParser extends LasReader {
     parseLasFile(new File(path))
   }
 
-  override def readCurve(path:String, name:String):Curve = {
+  override def readCurve(path:String):Curve = {
     throw new UnsupportedOperationException("oops, haven't implemented this yet")
   }
 

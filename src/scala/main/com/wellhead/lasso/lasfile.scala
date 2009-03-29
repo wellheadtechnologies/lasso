@@ -95,4 +95,5 @@ object WHLasFile {
     lf.setCurves(curves)
     lf
   }
+  def create(name:String):WHLasFile = null
 }

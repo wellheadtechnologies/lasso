@@ -17,16 +17,30 @@ object Main {
       writeLasFiles(lasfiles, destination)
     }
     else if(cmd == "pad"){
-      val (source1,indexName) = extractFileCurve(args(0))
-      val (source2,curveName) = extractFileCurve(args(1))
-      val destination = args(2)
-      val lasfiles = readSources(source1 :: source2 :: Nil)
-      val lf1 = lasfiles.first
-      val lf2 = lasfiles(1)
-      val index = lf1.getCurve(indexName)
-      val curve = lf2.getCurve(curveName)
-      val padded = WHCurve.adjustCurve(index, curve)
-      writeCurve(padded, destination)
+      val parser = new OptionParser()
+      parser.accepts("stream")
+      val optionSet = parser.parse(args:_*)
+      if(optionSet.has("stream")){
+	val protocol = optionSet.valueOf("stream").toString
+	val reader = resolveReader(protocol).get
+	val writer = resolveWriter(protocol).get
+	val index = reader.readCurve("stdin")
+	val curve = reader.readCurve("stdin")
+	val padded = WHCurve.adjustCurve(index, curve)
+	writer.writeCurve(curve, "stdout")
+      }
+      else {
+	val (source1,indexName) = extractFileCurve(args(0))
+	val (source2,curveName) = extractFileCurve(args(1))
+	val destination = args(2)
+	val lasfiles = readSources(source1 :: source2 :: Nil)
+	val lf1 = lasfiles.first
+	val lf2 = lasfiles(1)
+	val index = lf1.getCurve(indexName)
+	val curve = lf2.getCurve(curveName)
+	val padded = WHCurve.adjustCurve(index, curve)
+	writeCurve(padded, destination)
+      }
     }
     else {
       throw new UnsupportedOperationException("ooops, haven't implemented this yet")

@@ -7,6 +7,7 @@ import java.util.{List, Collections, ArrayList, LinkedList}
 import java.lang.Double
 
 final class WHCurve extends Curve {
+  private val logger = LoggerFactory.getLogger("WHCurve")
   private var descriptor:Descriptor = null
   private var data:List[Double] = null
   private var index:Curve = null
@@ -30,9 +31,18 @@ final class WHCurve extends Curve {
   override def equals(_that:Any):Boolean = {
     if(!_that.isInstanceOf[Curve]) return false
     val that = _that.asInstanceOf[Curve]
-    if(this.getDescriptor != that.getDescriptor ||
-       this.getLasData != that.getLasData ||
-       this.getIndex != that.getIndex) return false
+    if(this.getDescriptor != that.getDescriptor){
+      logger.debug("descriptors not equal: {} {}", this.getDescriptor, that.getDescriptor)
+      return false
+    }
+    if(this.getLasData != that.getLasData) {
+      logger.debug("data not equal: {} {}", this.getLasData, that.getLasData)
+      return false
+    }
+    if(this.getIndex != that.getIndex) {
+      logger.debug("indexes not equal: {} {}", this.getIndex, that.getIndex)
+      return false
+    }
     return true
   }
 }

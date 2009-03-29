@@ -8,8 +8,8 @@
    :implements [com.wellhead.lasso.LasReader]
    :methods [[parseName [Object] String]
 	     [parseHeaders [Object] java.util.List]
-	     [parseCurves [Object Object] java.util.List]
-	     [parseCurve [Object Object] com.wellhead.lasso.Curve]
+	     [parseCurves [Object] java.util.List]
+	     [parseCurve [Object] com.wellhead.lasso.Curve]
 	     [parseDescriptors [Object] java.util.List]
 	     [parseDescriptor [Object] com.wellhead.lasso.Descriptor]
 	     [parseLasData [Object] java.util.List]
@@ -27,12 +27,17 @@
 		    (new InputStreamReader System/in)
 		    (new FileReader path))))
 	lf (read reader)
-	whlasfile (new WHLasFile)]    
+	whlasfile (new WHLasFile)
+	whcurves (.parseCurves this lf)
+	whindex (first whcurves)
+	whcurves (rest whcurves)]    
+    (doseq [whcurve whcurves]
+      (.setIndex whcurve whindex))
     (doto whlasfile
       (.setName (.parseName this lf))
       (.setHeaders (.parseHeaders this lf))
-      (.setIndex (.parseCurve this (:index lf)))
-      (.setCurves (.parseCurves this lf)))))
+      (.setIndex whindex)
+      (.setCurves whcurves))))
 
 (defn -readCurve [this path]
   (let [reader 
@@ -42,7 +47,7 @@
 		    (new InputStreamReader System/in)
 		    (new FileReader path))))
 	curve (read reader)]
-    (.parseCurve this)))
+    (.parseCurve this curve)))
 
 (defn -parseName [this lasfile]
   (:name lasfile))
@@ -88,15 +93,20 @@
 
 (defn -parseCurves [this lasfile]
   (let [curves (:curves lasfile)
-	list (new ArrayList (count curves))
-	index (.parseCurve this nil (:index lasfile))]
+	list (new ArrayList (count curves))]
     (doseq [curve curves]
       (.add list (.parseCurve this curve)))
     list))
 
-(defn -parseCurve [this index curve]
+(defn -parseCurve [this curve]
   (let [whcurve (new WHCurve)]
     (doto whcurve
       (.setDescriptor (.parseDescriptor this (:descriptor curve)))
-      (.setIndex index)
       (.setLasData (.parseLasData this curve)))))
+
+(defn -parseLasData [this curve]
+  (let [data (:data curve)
+	list (new ArrayList (count data))]
+    (doseq [d data]
+      (.add list d))
+    list))

@@ -7,30 +7,22 @@ import java.util.{List,ArrayList}
 class ClojureWriter extends LasWriter {
 
   override def writeLasFile(lf: LasFile, path:String) { 
-    if(path == "stdout"){
-      writeLasFile(lf, new BufferedWriter(new OutputStreamWriter(System.out)))
-    }
-    else {
-      writeLasFile(lf, new File(path))
+    val writer = new BufferedWriter(if(path == "stdout") new OutputStreamWriter(System.out)
+				    else new FileWriter(path))
+    try {
+      writeLasFile(lf, writer)
+    } finally {
+      writer.close()
     }
   }
 
   override def writeCurve(curve:Curve, path:String) { 
-    if(path == "stdout"){
-      val writer = new BufferedWriter(new OutputStreamWriter(System.out))
-      try {
-	writeCurve(curve, writer)
-      } finally {
-	writer.close()
-      }
-    }
-    else {
-      val writer = new BufferedWriter(new FileWriter(path))
-      try {
-	writeCurve(curve, writer)
-      } finally {
-	writer.close()
-      }
+    val writer = new BufferedWriter(if(path == "stdout") new OutputStreamWriter(System.out) 
+				    else new FileWriter(path))
+    try {
+      writeCurve(curve, writer)
+    } finally {
+      writer.close()
     }
   }
   

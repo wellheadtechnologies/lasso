@@ -48,18 +48,11 @@
   <target name="build-core" depends="clean,init">
     <scalac srcdir="${src.dir}" destdir="${classes.dir}">
       <classpath refid="java_scala.classpath" />
-      <include name="scala/com/**/*.scala" />
+      <include name="scala/main/**/*.scala" />
       <include name="java/**/*.java" />
     </scalac>
     <javac srcdir="${java.src.dir}" destdir="${classes.dir}">
-      <classpath>
-	<fileset dir="${lib.dir}">
-	  <include name="**/*.jar" />
-	</fileset>
-	<fileset dir="${build.dir}">
-	  <include name="**/*.class" />
-	</fileset>
-      </classpath>
+      <classpath refid="java_scala.classpath"/>
     </javac>
     <java classname="clojure.lang.Compile" fork="true">
       <classpath>
@@ -75,7 +68,14 @@
     <copy todir="${resources.dir}" file="resources/logback.xml" />
   </target>
 
-  <target name="jar" depends="build">
+  <target name="build-tests" depends="build-core">
+    <scalac srcdir="${src.dir}" destdir="${classes.dir}">
+      <classpath refid="java_scala.classpath" />
+      <include name="scala/tests/**/*.scala" />
+    </scalac>
+  </target>
+
+  <target name="jar" depends="build-tests">
     <propertyfile file="${classes.dir}/version.properties">
       <entry  key="version" type="int" operation="+" default="0" />
     </propertyfile>

@@ -17,11 +17,11 @@ class LassoTest extends FunSuite {
   test("writing and reading clojure") {
     val writer = new ClojureWriter
     val reader = new ClojureReader
-    val lfreader = new LasFileReader
+    val lfreader = new LasFileParser
     val lf = lfreader.readLasFile("las_files/test.las")
     writer.writeLasFile(lf, "test_output.clj")
     val lf2 = reader.readLasFile("test_output.clj")
-    assert(lf.contentEquals(lf2))
+    assert(lf.contentEquals(lf2).booleanValue)
   }
 }
 

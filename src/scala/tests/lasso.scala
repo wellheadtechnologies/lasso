@@ -23,5 +23,6 @@ class LassoTest extends FunSuite {
     val lf2 = reader.readLasFile("test_output.clj")
     assert(lf.contentEquals(lf2).booleanValue)
   }
+
 }
 

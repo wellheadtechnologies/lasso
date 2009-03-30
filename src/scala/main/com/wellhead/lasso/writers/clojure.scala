@@ -25,6 +25,22 @@ class ClojureWriter extends LasWriter {
       writer.close()
     }
   }
+
+  def writeLasFileToString(lf:LasFile):String = {
+    val swriter = new StringWriter
+    val writer = new BufferedWriter(swriter)
+    writeLasFile(lf, writer)
+    writer.close()
+    swriter.toString
+  }
+
+  def writeCurveToString(curve:Curve):String = {
+    val swriter = new StringWriter
+    val writer = new BufferedWriter(swriter)
+    writeCurve(curve, writer)
+    writer.close()
+    swriter.toString
+  }
   
   override def canWrite(protocol:String) = protocol == "clojure"
 

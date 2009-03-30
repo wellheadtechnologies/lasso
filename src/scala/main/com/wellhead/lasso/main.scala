@@ -21,12 +21,12 @@ object Main {
       parser.accepts("stream")
       val optionSet = parser.parse(args:_*)
       if(optionSet.has("stream")){
-	val protocol = optionSet.valueOf("stream").toString
+	val protocol = args(1)
 	val reader = resolveReader(protocol).get
 	val writer = resolveWriter(protocol).get
 	val index = reader.readCurve("stdin")
 	val curve = reader.readCurve("stdin")
-	val padded = WHCurve.adjustCurve(index, curve)
+	val padded = CurveUtil.adjustCurve(index, curve)
 	writer.writeCurve(curve, "stdout")
       }
       else {
@@ -38,7 +38,7 @@ object Main {
 	val lf2 = lasfiles(1)
 	val index = lf1.getCurve(indexName)
 	val curve = lf2.getCurve(curveName)
-	val padded = WHCurve.adjustCurve(index, curve)
+	val padded = CurveUtil.adjustCurve(index, curve)
 	writeCurve(padded, destination)
       }
     }

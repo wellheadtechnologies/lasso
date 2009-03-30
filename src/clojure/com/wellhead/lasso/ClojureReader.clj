@@ -1,6 +1,6 @@
 (ns com.wellhead.lasso.ClojureReader
   (:import (java.io PushbackReader BufferedReader FileReader InputStreamReader)
-	   (com.wellhead.lasso WHLasFile Curve Header WHVersionHeader
+	   (com.wellhead.lasso WHLasFile Curve Header WHVersionHeader LasFile
 			       WHWellHeader WHCurveHeader WHParameterHeader
 			       WHDescriptor WHCurve WHHeader)
 	   (java.util List ArrayList))
@@ -13,6 +13,7 @@
 	     [parseDescriptors [Object] java.util.List]
 	     [parseDescriptor [Object] com.wellhead.lasso.Descriptor]
 	     [parseLasData [Object] java.util.List]
+	     [parseLasFile [Object] com.wellhead.lasso.LasFile]
 	     ]))
 
 
@@ -26,18 +27,8 @@
 		  (if (= path "stdin") 
 		    (new InputStreamReader System/in)
 		    (new FileReader path))))
-	lf (read reader)
-	whlasfile (new WHLasFile)
-	whcurves (.parseCurves this lf)
-	whindex (first whcurves)
-	whcurves (rest whcurves)]    
-    (doseq [whcurve whcurves]
-      (.setIndex whcurve whindex))
-    (doto whlasfile
-      (.setName (.parseName this lf))
-      (.setHeaders (.parseHeaders this lf))
-      (.setIndex whindex)
-      (.setCurves whcurves))))
+	lf (read reader)]
+    (.parseLasFile this lf)))
 
 (defn -readCurve [this path]
   (let [reader 
@@ -48,6 +39,19 @@
 		    (new FileReader path))))
 	curve (read reader)]
     (.parseCurve this curve)))
+
+(defn -parseLasFile [this lf]
+  (let [whlasfile (new WHLasFile)
+	whcurves (.parseCurves this lf)
+	whindex (first whcurves)
+	whcurves (rest whcurves)]    
+    (doseq [whcurve whcurves]
+      (.setIndex whcurve whindex))
+    (doto whlasfile
+      (.setName (.parseName this lf))
+      (.setHeaders (.parseHeaders this lf))
+      (.setIndex whindex)
+      (.setCurves whcurves))))
 
 (defn -parseName [this lasfile]
   (:name lasfile))

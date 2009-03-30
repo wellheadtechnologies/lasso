@@ -48,9 +48,6 @@ final class WHCurve extends Curve {
 }
 
 object WHCurve {
-  implicit def double2Double(d:java.lang.Double):scala.Double = d.doubleValue
-  implicit def Doubl2double(d:scala.Double):java.lang.Double = new Double(d)
-
   def apply(descriptor:Descriptor, index:Curve, data:List[Double]):WHCurve = {
     val curve = new WHCurve
     curve.setDescriptor(descriptor)
@@ -58,6 +55,11 @@ object WHCurve {
     curve.setLasData(data)
     curve
   }
+}
+
+object CurveUtil {
+  implicit def double2Double(d:java.lang.Double):scala.Double = d.doubleValue
+  implicit def Doubl2double(d:scala.Double):java.lang.Double = new Double(d)
 
   //assumes smallToLarge order
   def startOffset(pindex:List[Double], index:List[Double], srate:Double):Int = {
@@ -91,8 +93,8 @@ object WHCurve {
     val cidata = curve.getIndex.getLasData
     Collections.sort(pdata)
     Collections.sort(cidata)
-    val start_offset = startOffset(pdata, cidata, WHCurve.sampleRate(curve))
-    val end_offset = endOffset(pdata, cidata, WHCurve.sampleRate(curve))
+    val start_offset = startOffset(pdata, cidata, sampleRate(curve))
+    val end_offset = endOffset(pdata, cidata, sampleRate(curve))
     WHCurve(curve.getDescriptor, pindex,
 	    padData(start_offset, end_offset, curve.getLasData))
   }

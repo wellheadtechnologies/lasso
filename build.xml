@@ -1,4 +1,4 @@
-<project xmlns:ivy="antlib:org.apache.ivy.ant" name="lasso" default="build">
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="lasso" default="build-core">
   <property name="revision" value="0.13" />
   <property name="ivy.settings.dir" value="../settings" />
   <property file="${ivy.settings.dir}/ivysettings.properties" />
@@ -11,9 +11,6 @@
   <property name="lib.dir" value="lib" />
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="resources.dir" value="${build.dir}/resources" />
-
-  <ivy:settings file="${ivy.settings.dir}/ivysettings.xml" />
-  
 
   <taskdef resource="scala/tools/ant/antlib.xml">
     <classpath>
@@ -106,9 +103,9 @@
     <property name="revision" value="${version}"/>
     <delete file="${build.dir}/ivy.xml"/>
     <ivy:publish artifactspattern="${build.dir}/[artifact].[ext]" 
-		 resolver="projects"
 		 pubrevision="${revision}" 
 		 status="release"
+		 resolver="local"
 		 overwrite="true"
 		 />
     <echo message="project ${ant.project.name} released with version ${revision}" />

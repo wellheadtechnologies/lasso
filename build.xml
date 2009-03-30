@@ -12,13 +12,6 @@
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="resources.dir" value="${build.dir}/resources" />
 
-  <taskdef resource="scala/tools/ant/antlib.xml">
-    <classpath>
-      <pathelement location="${lib.dir}/scala-compiler-2.7.3.jar" />
-      <pathelement location="${lib.dir}/scala-library-2.7.3.jar" />
-    </classpath>
-  </taskdef>
-
   <target name="resolve">
     <ivy:retrieve/>
   </target>
@@ -41,6 +34,13 @@
       <include name="**/*.class" />
     </fileset>
   </path>
+
+  <taskdef resource="scala/tools/ant/antlib.xml">
+    <classpath>
+      <pathelement location="${lib.dir}/scala-compiler-2.7.3.jar" />
+      <pathelement location="${lib.dir}/scala-library-2.7.3.jar" />
+    </classpath>
+  </taskdef>
 
   <target name="build-core" depends="clean,init">
     <scalac srcdir="${src.dir}" destdir="${classes.dir}">

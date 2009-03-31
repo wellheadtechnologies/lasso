@@ -162,7 +162,12 @@ class ClojureWriter extends LasWriter {
 
     write("[")
     for(d <- curve.getLasData){
-      write(d.toString)
+      if(d.isNaN){
+	write("java.lang.Double/NaN")
+      }
+      else {
+	write(d.toString)
+      }
       write(" ")
     }
     write("]")

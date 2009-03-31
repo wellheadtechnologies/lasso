@@ -71,11 +71,13 @@ object CurveUtil {
     ((pindex.last - index.last).abs / srate).intValue
   }
 
-  def replaceNullWithNaN(list:List[Double]) = {
-    list.map(d => {
-      val diff = Math.abs(Math.abs(d) - 999.25)
-      if(d < 0 && diff < 0.00001) java.lang.Double.NaN else d
-    })
+  def replaceNullWithNaN(list:List[Double]):Seq[Double] = {
+    list.map(replaceNullWithNaN).toList
+  }
+
+  def replaceNullWithNaN(d:Double):Double = {
+    val diff = Math.abs(Math.abs(d) - 999.25)
+    if(d < 0 && diff < 0.00001) java.lang.Double.NaN else d
   }
 
   //assumes immutability of curve and index
@@ -88,7 +90,7 @@ object CurveUtil {
     rate.abs
   }
 
-  def adjustCurve(pindex:Curve, curve:Curve) = {
+  def adjustCurve(pindex:Curve, curve:Curve):Curve = {
     val pdata = pindex.getLasData
     val cidata = curve.getIndex.getLasData
     Collections.sort(pdata)
@@ -102,7 +104,7 @@ object CurveUtil {
   def padData(startPadding:Int, endPadding:Int, data:List[Double]) = {
     val newData = new ArrayList[Double]
     for(nan <- repeat(startPadding, () => Double.NaN)) newData.add(nan)
-    for(datum <- data) newData.add(datum)
+    for(datum <- data) newData.add(replaceNullWithNaN(datum))
     for(nan <- repeat(endPadding, () => Double.NaN)) newData.add(nan)
     newData
   }

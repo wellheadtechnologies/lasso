@@ -29,4 +29,6 @@ public interface LasFile {
     void setParameterHeader(ParameterHeader ph);
 
     Boolean contentEquals(LasFile that);
+
+    void replaceCurve(Curve old, Curve _new);
 }

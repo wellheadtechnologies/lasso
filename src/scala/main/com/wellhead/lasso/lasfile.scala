@@ -37,6 +37,10 @@ final class WHLasFile extends LasFile {
     list.add(parameterHeader)
     list
   }
+  
+  override def replaceCurve(old:Curve, _new:Curve) {
+    curves.set(curves.indexOf(old), _new)
+  }
 
   override def setIndex(index:Curve) { this.index = index }
   override def setCurves(curves:List[Curve]) { this.curves = curves }

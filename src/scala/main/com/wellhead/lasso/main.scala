@@ -6,7 +6,7 @@ import scala.collection.jcl.Conversions._
 import java.io.{BufferedWriter,OutputStreamWriter, FileWriter, File}
 import joptsimple.{OptionParser,OptionSet}
 
-object Main {
+/*object Main {
   def main(_args:Array[String]) {
     val cmd = _args.first
     val args = _args.drop(1).toArray
@@ -114,3 +114,4 @@ object Main {
     
 }
 
+*/

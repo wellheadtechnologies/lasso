@@ -1,7 +1,7 @@
 package com.wellhead.lasso
 import org.scalatest._
 
-class LassoTest extends FunSuite {
+/*class LassoTest extends FunSuite {
   test("lasso las_files/test.las sqlite://las.db"){
     Main.main("las_files/test.las sqlite://las.db".split(" "))
   }
@@ -26,3 +26,4 @@ class LassoTest extends FunSuite {
 
 }
 
+*/

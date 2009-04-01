@@ -29,5 +29,11 @@ object Util {
       connection.close()
     }
   }
+
+  def guard(cond:Boolean, msg:String) {
+    if(!cond){
+      throw new RuntimeException(msg)
+    }
+  }
   
 }

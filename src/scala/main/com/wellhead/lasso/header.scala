@@ -4,6 +4,7 @@ import java.util.{List,LinkedList,ArrayList}
 import scala.collection.jcl.Conversions._
 
 trait WHHeader extends Header {
+  private val logger = LoggerFactory.getLogger("WHHeader")
   var descriptors:List[Descriptor] = null
   override def getDescriptors = descriptors
   override def getDescriptor(name:String) =
@@ -12,9 +13,25 @@ trait WHHeader extends Header {
   override def equals(_that:Any):Boolean = {
     if(!_that.isInstanceOf[Header]) return false
     val that = _that.asInstanceOf[Header]
-    if(this.getType != that.getType || 
-       this.getPrefix != that.getPrefix || 
-       this.getDescriptors != that.getDescriptors) return false
+    if(this.getType != that.getType){
+      logger.debug("types not equal : {} {}", this.getType, that.getType)
+      return false
+    }
+    if(this.getPrefix != that.getPrefix){
+      logger.debug("prefixes not equal : {} {}", this.getPrefix, that.getPrefix)
+      return false
+    }
+    if(this.getDescriptors != that.getDescriptors){
+      if(logger.isDebugEnabled){
+	for(i <- 0 until this.getDescriptors.size){
+	  if(this.getDescriptors.get(i) != that.getDescriptors.get(i)){
+	    logger.debug("descriptors not equal : {} != \n {}", 
+			 this.getDescriptors.get(i), that.getDescriptors.get(i))
+	  }
+	}
+      }
+      return false
+    }
     return true
   }
 }

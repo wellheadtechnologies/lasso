@@ -174,6 +174,11 @@ class ClojureWriter extends LasWriter {
     write("}")
   }
   
-  private def quote(s:String) = "\"" + s + "\""
+  private def quote(s:String) = {
+    "\"" + escape(s) + "\""
+  }
+  private def escape(s:String) = {
+    s.replaceAll("\"", "\\\\\"")
+  }
 }
 

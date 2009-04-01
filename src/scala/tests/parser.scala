@@ -70,12 +70,23 @@ class ParserTest extends FunSuite {
       assert(lf1.contentEquals(lf2).booleanValue)
     }
     val directory = new File("las_files")
-    var i = 0
     for(file <- directory.listFiles){
-      if(i % 2 == 0){
-	in_out(file)
-      }
-      i += 1
+      in_out(file)
+    }
+  }
+
+  test ("Clojure Writer should write lasfile") {
+    val writer = new ClojureWriter()
+    val reader = new ClojureReader()
+    def in_out(file:File) {
+      val lf1 = time("parsing took: ") { parser.readLasFile(file.getPath) }
+      time("clojure writing took: ") { writer.writeLasFile(lf1, "output_test.clj") }
+      val lf2 = time("clojure reading took: ") { reader.readLasFile("output_test.clj") }
+      assert(lf1.contentEquals(lf2).booleanValue)
+    }
+    val directory = new File("las_files")
+    for(file <- directory.listFiles){
+      in_out(file)
     }
   }
 }
